@@ -32,7 +32,7 @@ Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 with Session() as session:
     # Inserindo dados
-    novo_filme = Filme(titulo="Senhor do Anéis", genero="Fantasia", ano=1999)
+    novo_filme = Filme(titulo="Batman", genero="Ficção", ano=2000)
     session.add(novo_filme)
     session.commit()
 
@@ -40,3 +40,4 @@ with Session() as session:
     filmes = session.query(Filme).all()
     for filme in filmes:
         print(filme.titulo, filme.genero, filme.ano)
+
