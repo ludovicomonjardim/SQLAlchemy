@@ -1,7 +1,8 @@
 # from sqlalchemy.exc import SQLAlchemyError
 # from database import Database
 from models.filme import Filme
-from utils.session import session_manager  # ✅ Corrigir importação
+from utils.session import session_manager
+import logging
 
 
 class FilmeRepository:
@@ -13,7 +14,7 @@ class FilmeRepository:
         try:
             if isinstance(data, list):  # 🔥 Se for uma lista, insere múltiplos registros
                 filmes = [Filme(**filme_data) for filme_data in data]
-                session.add_all(filmes)
+                session.bulk_save_objects(filmes)
                 print(f"{len(filmes)} filmes inseridos com sucesso!")
             else:  # 🔥 Se for um único dicionário, insere um filme
                 filme = Filme(**data)
@@ -27,14 +28,35 @@ class FilmeRepository:
     @staticmethod
     @session_manager
     def update(where, with_, session):
-        """Atualiza registros com base no filtro `where` e nos valores `with_`."""
+        """Atualiza registros com base no filtro `where` e nos valores `with_`.
+
+        Args:
+            where (dict): Condições para localizar os registros a serem atualizados. Exemplo: {"titulo": "Matrix"}
+            with_ (dict): Novos valores a serem atribuídos aos registros encontrados. Exemplo: {"ano": 2001}
+            session (Session): Sessão ativa do SQLAlchemy.
+
+        Returns:
+            int: Número de registros modificados.
+        """
         try:
-            result = session.query(Filme).filter_by(**where).update(with_)
-            if result:
-                print(f"Filme atualizado com sucesso! {result} registro(s) modificado(s).")
-            else:
+            filmes = session.query(Filme).filter_by(**where).all()  # Buscar os registros antes de atualizar
+
+            if not filmes:
                 print("Nenhum filme encontrado para atualização.")
-            return result
+                return 0
+
+            count = 0
+            for filme in filmes:
+                for key, value in with_.items():
+                    if hasattr(filme, key):  # Garantir que o campo existe no modelo
+                        setattr(filme, key, value)
+                    else:
+                        print(f"Aviso: O campo '{key}' não existe no modelo Filme e foi ignorado.")
+                count += 1
+
+            print(f"{count} filme(s) atualizado(s) com sucesso.")
+            return count
+
         except Exception as e:
             print(f"Erro ao atualizar filme: {e}")
             return 0
@@ -113,3 +135,23 @@ class FilmeRepository:
                 print(f"{filme.titulo:<30} {filme.genero:<15} {filme.ano:<5}")
         else:
             print("Nenhum filme encontrado na tabela.")
+
+
+logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
+
+@staticmethod
+@session_manager
+def insert(data, session):
+    try:
+        if isinstance(data, list):
+            filmes = [Filme(**filme_data) for filme_data in data]
+            session.bulk_save_objects(filmes)
+            print(f"{len(filmes)} filmes inseridos com sucesso!")
+        else:
+            filme = Filme(**data)
+            session.add(filme)
+            print(f"Filme '{filme.titulo}' inserido com sucesso!")
+        return True
+    except Exception as e:
+        logging.error(f"Erro ao inserir filme(s): {e}")
+        return False

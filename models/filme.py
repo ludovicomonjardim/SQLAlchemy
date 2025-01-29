@@ -1,14 +1,17 @@
 from models.base import Base
-from sqlalchemy import Column, String, Integer
+from sqlalchemy import Column, String, Integer, inspect
 from sqlalchemy.orm import validates
 
 # Modelo da tabela "filmes"
 class Filme(Base):
     __tablename__ = "filmes"
 
-    titulo = Column(String, primary_key=True)
+    id = Column(Integer, primary_key=True)
+    titulo = Column(String, nullable=False)
     genero = Column(String, nullable=False)
     ano = Column(Integer, nullable=False)
+
+
 
     def __repr__(self):
         return f"Filme(titulo='{self.titulo}', genero='{self.genero}', ano={self.ano})"
@@ -27,7 +30,8 @@ class Filme(Base):
 
     @validates("ano")
     def valida_ano(self, key, value):
-        """Valida se o ano está dentro de um intervalo permitido"""
+        if not isinstance(value, int):
+            raise TypeError("O ano deve ser um número inteiro.")
         if not (1800 <= value <= 2100):
             raise ValueError(f"O ano {value} não é válido. Deve estar entre 1800 e 2100.")
         return value

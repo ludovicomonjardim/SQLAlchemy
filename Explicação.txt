@@ -1,6 +1,6 @@
 Estrutura do projeto:
 
-meu_projeto/
+SQLAlchemy/
 ├── models/
 │   ├── __init__.py             # Inicializa o pacote models (opcional)
 │   ├── base.py                 # Base declarativa
@@ -16,26 +16,26 @@ meu_projeto/
 
 
 Resumo da Função de Cada Arquivo:
-meu_projeto/
+SQLAlchemy/
     => Contém as subpastas, main.py e database.py
-    - meu_projeto/database.py
+    - SQLAlchemy/database.py
         => Configuração da engine e Session do SQLAlchemy.
-    - meu_projeto/main.py
+    - SQLAlchemy/main.py
         => Arquivo principal do projeto, onde as funções são chamadas.
 
-meu_projeto/models/
+SQLAlchemy/models/
     => Contém os modelos ORM (definição das tabelas do banco).
     - models/base.py
         => Contém a Base Declarativa para os modelos ORM.
     - models/filme.py
         => Define a classe Filme, representando a tabela filmes.
 
-meu_projeto/repositories/
+SQLAlchemy/repositories/
     => Contém as classes Repository, responsáveis pelas consultas ao banco.
     - repositories/filme_repository.py
         => Classe FilmeRepository, com métodos para buscar, inserir, atualizar e excluir registros no banco.
 
-meu_projeto/utils/
+SQLAlchemy/utils/
     => Contém utilitários gerais, como o gerenciamento de sessões.
     - utils/session.py
         => Define o decorador @session_manager para gerenciar sessões.
