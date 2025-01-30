@@ -1,17 +1,19 @@
 from models.base import Base
-from sqlalchemy import Column, String, Integer, inspect
+from sqlalchemy import Column, String, Integer, Boolean
 from sqlalchemy.orm import validates
+
 
 # Modelo da tabela "filmes"
 class Filme(Base):
     __tablename__ = "filmes"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     titulo = Column(String, nullable=False)
     genero = Column(String, nullable=False)
     ano = Column(Integer, nullable=False)
-
-
+    diretor = Column(String(100))  #  Nova coluna
+    nota = Column(Integer)         #  Nova coluna
+    ativo = Column(Boolean)        #  Nova coluna
 
     def __repr__(self):
         return f"Filme(titulo='{self.titulo}', genero='{self.genero}', ano={self.ano})"

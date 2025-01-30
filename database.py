@@ -9,7 +9,8 @@ DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@l
 # DATABASE_URL = "postgresql+psycopg2://postgres:admin@localhost:5432/cinema"
 
 # Criação da engine
-engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20)
+engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=False)
+
 
 # Configuração do sessionmaker
 Session = sessionmaker(bind=engine)

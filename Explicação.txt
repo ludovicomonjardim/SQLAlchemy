@@ -10,6 +10,7 @@ SQLAlchemy/
 │   ├── filme_repository.py     # Repositório para Filme
 ├── utils/                      # Pasta para utilitários
 │   ├── __init__.py             # Inicializa o pacote utils (opcional)
+│   ├── migration.py            #
 │   ├── session.py              # Gerenciamento de sessões (decorador)
 ├── database.py                 # Configuração do banco (engine, conn e sessionmaker)
 ├── main.py                     # Ponto de entrada do programa
@@ -37,5 +38,7 @@ SQLAlchemy/repositories/
 
 SQLAlchemy/utils/
     => Contém utilitários gerais, como o gerenciamento de sessões.
+    - utils/migration.py
+        =>
     - utils/session.py
         => Define o decorador @session_manager para gerenciar sessões.
