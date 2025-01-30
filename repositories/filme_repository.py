@@ -1,5 +1,4 @@
 # from sqlalchemy.exc import SQLAlchemyError
-# from database import Database
 from models.filme import Filme
 from utils.session import session_manager
 import logging

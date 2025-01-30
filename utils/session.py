@@ -1,3 +1,4 @@
+import logging
 from functools import wraps
 from database import Session
 
@@ -13,5 +14,6 @@ def session_manager(func):
             except Exception as e:
                 session.rollback()
                 print(f"Erro: {e}")
+                logging.error(f"Erro na sessão: {e}", exc_info=True)
                 raise
     return wrapper

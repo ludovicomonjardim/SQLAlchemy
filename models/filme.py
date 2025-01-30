@@ -6,11 +6,10 @@ from sqlalchemy.orm import validates
 class Filme(Base):
     __tablename__ = "filmes"
 
-    id = Column(Integer, primary_key=True)
+    # id = Column(Integer, primary_key=True)
     titulo = Column(String, nullable=False)
     genero = Column(String, nullable=False)
     ano = Column(Integer, nullable=False)
-
 
 
     def __repr__(self):
