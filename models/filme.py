@@ -11,9 +11,9 @@ class Filme(Base):
     titulo = Column(String, nullable=False)
     genero = Column(String, nullable=False)
     ano = Column(Integer, nullable=False)
-    diretor = Column(String(100))  #  Nova coluna
-    nota = Column(Integer)         #  Nova coluna
-    ativo = Column(Boolean)        #  Nova coluna
+    diretor = Column(String(100))
+    nota = Column(Integer)
+    ativo = Column(Boolean)
 
     def __repr__(self):
         return f"Filme(titulo='{self.titulo}', genero='{self.genero}', ano={self.ano})"
@@ -45,3 +45,10 @@ class Filme(Base):
         if value not in generos_permitidos:
             raise ValueError(f"Gênero '{value}' inválido. Escolha entre {generos_permitidos}")
         return value
+
+    @validates("nota")
+    def valida_nota(self, key, value):
+        if not isinstance(value, int):
+            raise TypeError("A nota deve ser um número inteiro.")
+        if value < 0 or value > 10:
+            raise ValueError(f"Nota '{value}' é inválida. Informe uma nota entre 0 e 10.")

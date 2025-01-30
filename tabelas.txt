@@ -32,10 +32,12 @@ Campo	            Tipo	        Constraints                                     D
 ------------------------------------------------------------------
 id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           Identificador único do filme
 titulo	            VARCHAR(200)	NOT NULL                                        Título do filme
-ano_lancamento	    YEAR	                                                        Ano de lançamento
-duracao	            INT	                                                            Duração do filme em minutos
+ano           	    YEAR	        CHECK (ano >= 1888)                             Ano de lançamento
+duracao	            INT	            CHECK (duracao > 0)                             Duração do filme em minutos
 sinopse	            TEXT	                                                        Breve descrição da história
 classificacao_id	INT (FK)	    FOREIGN KEY → CLASSIFICACOES(id), NOT NULL      Classificação indicativa (liga com classificacoes)
+nota                INT             CHECK (nota >= 0 AND nota <= 10)                Nota de avalição do filme
+ativo               BOOLEAN                                                         Filme em cartaz ou não
 
 
 ==================================================================
@@ -58,6 +60,7 @@ filme_id	        INT (FK)	    FOREIGN KEY → FILMES(id), NOT NULL              
 genero_id	        INT (FK)	    FOREIGN KEY → GENEROS(id), NOT NULL             Relaciona com generos.id
 UNIQUE (filme_id, genero_id) (Evita que um filme tenha um gênero repetido)
 
+
 ==================================================================
 FILMES_ATORES (Relação entre filmes e atores)
 ------------------------------------------------------------------
@@ -69,6 +72,7 @@ ator_id	            INT (FK)	    FOREIGN KEY → ATORES(id), NOT NULL           
 papel	            VARCHAR(100)	Papel desempenhado no filme (opcional)
 UNIQUE (filme_id, ator_id) (Evita que o mesmo ator apareça mais de uma vez no mesmo filme)
 
+
 ==================================================================
 FILMES_DIRETORES (Relação entre filmes e diretores)
 ------------------------------------------------------------------
@@ -78,6 +82,7 @@ id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           
 filme_id	        INT (FK)	    FOREIGN KEY → FILMES(id), NOT NULL              Relaciona com filmes.id
 diretor_id	        INT (FK)	    FOREIGN KEY → DIRETORES(id), NOT NULL           Relaciona com diretores.id
 UNIQUE (filme_id, diretor_id) (Evita diretores duplicados no mesmo filme)
+
 
 ==================================================================
 SESSÕES
