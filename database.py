@@ -2,22 +2,38 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 from models.base import Base
+
+# IMPORTANDO TODOS OS MODELOS AQUI PARA EVITAR ERRO DE REFERÊNCIA
+from models.actor import Actor
+from models.classification import Classification
+from models.director import Director
+from models.genre import Genre
+from models.movie import Movie
+from models.movie_actor import MovieActor
+from models.movie_director import MovieDirector
+from models.movie_genre import MovieGenre
+from models.cinema_session import CinemaSession
+from models.ticket import Ticket
+
 import os
 
-# Database configuration
+# Configuração do banco de dados
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
 
-# Creating the engine
+# Criando a engine
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=False)
 
-# Session configuration
+# Criador de sessão
 Session = sessionmaker(bind=engine)
 
-# Function to initialize the database
+
 def initialize_database():
-    """Creates all tables in the database based on the models."""
+    """Cria as tabelas do banco de dados garantindo a ordem correta."""
+    print("Criando tabelas na ordem correta...")
     Base.metadata.create_all(engine)
-    print("Tables successfully created!")
+
+    print("Todas as tabelas foram criadas com sucesso!")
+
 
 @contextmanager
 def get_connection():

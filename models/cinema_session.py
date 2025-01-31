@@ -3,8 +3,8 @@ from sqlalchemy import Column, Integer, String, Date, Time, DECIMAL, ForeignKey,
 from sqlalchemy.orm import validates, Session
 from datetime import datetime, date, time
 
-class Session(Base):
-    __tablename__ = "sessions"
+class CinemaSession(Base):
+    __tablename__ = "cinema_sessions"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
@@ -21,7 +21,7 @@ class Session(Base):
     )
 
     def __repr__(self):
-        return f"<Session(id={self.id}, movie_id={self.movie_id}, date={self.date}, time={self.time}, room='{self.room}', capacity={self.capacity}, price={self.price})>"
+        return f"<Cinema Session(id={self.id}, movie_id={self.movie_id}, date={self.date}, time={self.time}, room='{self.room}', capacity={self.capacity}, price={self.price})>"
 
     @validates("capacity")
     def validate_capacity(self, key, value):
@@ -54,10 +54,10 @@ class Session(Base):
         return value
 
 # Validação antes do commit
-@event.listens_for(Session, "before_flush")
-def validate_session_before_commit(session, flush_context, instances):
-    for instance in session.new | session.dirty:  # Valida inserções e atualizações
-        if isinstance(instance, Session):
+@event.listens_for(CinemaSession, "before_flush")
+def validate_session_before_commit(cinema_session, flush_context, instances):
+    for instance in cinema_session.new | cinema_session.dirty:  # Valida inserções e atualizações
+        if isinstance(instance, CinemaSession):
             if not isinstance(instance.capacity, int) or instance.capacity <= 0:
                 raise ValueError("Capacity must be an integer greater than zero.")
             if instance.price is None or not isinstance(instance.price, (int, float)) or instance.price < 0:

@@ -13,7 +13,7 @@ SQLAlchemy/
 │   ├── movie_genre.py
 │   ├── movie_actor.py
 │   ├── movie_director.py
-│   ├── session.py
+│   ├── cinema_session.py
 │   ├── ticket.py
 ├── repositories/
 │   ├── __init__.py             # Inicializa o pacote repositories (opcional)

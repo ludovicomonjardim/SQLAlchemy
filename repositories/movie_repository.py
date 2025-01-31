@@ -58,32 +58,20 @@ class movieRepository:
         Atualiza registros na tabela 'movies' com base nos critérios fornecidos.
 
         Args:
-            where (dict): Condições para localizar os registros a serem atualizados (exemplo: {"titulo": "Matrix"}).
-            with_ (dict): Valores a serem atribuídos aos registros encontrados (exemplo: {"ano": 2001}).
+            where (dict): Condições para localizar os registros a serem atualizados (exemplo: {"title": "Matrix"}).
+            with_ (dict): Valores a serem atribuídos aos registros encontrados (exemplo: {"year": 2001}).
             session (Session): Sessão ativa do SQLAlchemy.
 
         Returns:
             int: Número de registros modificados.
         """
         try:
-            movies = session.query(Movie).filter_by(**where).all()
-            if not movies:
-                print("Nenhum movie encontrado para atualização.")
-                return 0
-
-            count = 0
-            for movie in movies:
-                for key, value in with_.items():
-                    if hasattr(movie, key):
-                        if getattr(movie, key) != value:  # Atualiza apenas se for diferente
-                            setattr(movie, key, value)
-                    else:
-                        print(f"Aviso: O campo '{key}' não existe no modelo movie e foi ignorado.")
-                count += 1
-
-            print(f"{count} movie(s) atualizado(s) com sucesso.")
-            return count
+            result = session.query(Movie).filter_by(**where).update(with_, synchronize_session=False)
+            session.commit()
+            print(f"{result} movie(s) atualizado(s) com sucesso.")
+            return result
         except Exception as e:
+            session.rollback()
             print(f"Erro ao atualizar movie: {e}")
             return 0
 
