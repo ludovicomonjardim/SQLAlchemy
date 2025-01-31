@@ -2,6 +2,9 @@ import logging
 from functools import wraps
 from database import Session
 
+# Configuração do logging
+logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
+
 # Decorador para gerenciar sessões
 def session_manager(func):
     @wraps(func)
@@ -13,7 +16,6 @@ def session_manager(func):
                 return result
             except Exception as e:
                 session.rollback()
-                print(f"Erro: {e}")
                 logging.error(f"Erro na sessão: {e}", exc_info=True)
                 raise
     return wrapper

@@ -1,16 +1,19 @@
 from models.base import Base
-from sqlalchemy import Column, String, Integer, inspect
+from sqlalchemy import Column, String, Integer, Boolean
 from sqlalchemy.orm import validates
+
 
 # Modelo da tabela "filmes"
 class Filme(Base):
     __tablename__ = "filmes"
 
-    # id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, autoincrement=True)
     titulo = Column(String, nullable=False)
     genero = Column(String, nullable=False)
     ano = Column(Integer, nullable=False)
-
+    diretor = Column(String(100))
+    nota = Column(Integer)
+    ativo = Column(Boolean)
 
     def __repr__(self):
         return f"Filme(titulo='{self.titulo}', genero='{self.genero}', ano={self.ano})"
@@ -42,3 +45,10 @@ class Filme(Base):
         if value not in generos_permitidos:
             raise ValueError(f"Gênero '{value}' inválido. Escolha entre {generos_permitidos}")
         return value
+
+    @validates("nota")
+    def valida_nota(self, key, value):
+        if not isinstance(value, int):
+            raise TypeError("A nota deve ser um número inteiro.")
+        if value < 0 or value > 10:
+            raise ValueError(f"Nota '{value}' é inválida. Informe uma nota entre 0 e 10.")

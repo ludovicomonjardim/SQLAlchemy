@@ -1,21 +1,48 @@
-# from sqlalchemy.exc import SQLAlchemyError
 from models.filme import Filme
 from utils.session import session_manager
+from utils.migration import atualizar_tabela
 import logging
 
 
 class FilmeRepository:
+    """
+    Repositório responsável pelas operações de banco de dados para a entidade Filme.
+
+    Métodos incluem inserção, atualização, deleção e busca de registros na tabela 'filmes'.
+    """
+
+    @staticmethod
+    def atualiza():
+        """
+        Atualiza a estrutura da tabela 'filmes', garantindo que a estrutura seja substituída corretamente.
+
+        Este método verifica a estrutura atual da tabela e adiciona colunas ausentes conforme o modelo definido.
+        """
+        try:
+            atualizar_tabela(Filme)
+            print("Atualização da tabela 'filmes' concluída com sucesso.")
+        except Exception as e:
+            print(f"Erro ao atualizar a tabela 'filmes': {e}")
 
     @staticmethod
     @session_manager
     def insert(data, session):
-        """Insere um ou vários filmes no banco."""
+        """
+        Insere um ou vários filmes no banco de dados.
+
+        Args:
+            data (dict | list[dict]): Um dicionário representando um filme ou uma lista de dicionários para inserção em massa.
+            session (Session): Sessão ativa do SQLAlchemy.
+
+        Returns:
+            bool: True se a inserção for bem-sucedida, False caso contrário.
+        """
         try:
-            if isinstance(data, list):  # 🔥 Se for uma lista, insere múltiplos registros
+            if isinstance(data, list):
                 filmes = [Filme(**filme_data) for filme_data in data]
                 session.bulk_save_objects(filmes)
                 print(f"{len(filmes)} filmes inseridos com sucesso!")
-            else:  # 🔥 Se for um único dicionário, insere um filme
+            else:
                 filme = Filme(**data)
                 session.add(filme)
                 print(f"Filme '{filme.titulo}' inserido com sucesso!")
@@ -27,19 +54,19 @@ class FilmeRepository:
     @staticmethod
     @session_manager
     def update(where, with_, session):
-        """Atualiza registros com base no filtro `where` e nos valores `with_`.
+        """
+        Atualiza registros na tabela 'filmes' com base nos critérios fornecidos.
 
         Args:
-            where (dict): Condições para localizar os registros a serem atualizados. Exemplo: {"titulo": "Matrix"}
-            with_ (dict): Novos valores a serem atribuídos aos registros encontrados. Exemplo: {"ano": 2001}
+            where (dict): Condições para localizar os registros a serem atualizados (exemplo: {"titulo": "Matrix"}).
+            with_ (dict): Valores a serem atribuídos aos registros encontrados (exemplo: {"ano": 2001}).
             session (Session): Sessão ativa do SQLAlchemy.
 
         Returns:
             int: Número de registros modificados.
         """
         try:
-            filmes = session.query(Filme).filter_by(**where).all()  # Buscar os registros antes de atualizar
-
+            filmes = session.query(Filme).filter_by(**where).all()
             if not filmes:
                 print("Nenhum filme encontrado para atualização.")
                 return 0
@@ -47,15 +74,15 @@ class FilmeRepository:
             count = 0
             for filme in filmes:
                 for key, value in with_.items():
-                    if hasattr(filme, key):  # Garantir que o campo existe no modelo
-                        setattr(filme, key, value)
+                    if hasattr(filme, key):
+                        if getattr(filme, key) != value:  # Atualiza apenas se for diferente
+                            setattr(filme, key, value)
                     else:
                         print(f"Aviso: O campo '{key}' não existe no modelo Filme e foi ignorado.")
                 count += 1
 
             print(f"{count} filme(s) atualizado(s) com sucesso.")
             return count
-
         except Exception as e:
             print(f"Erro ao atualizar filme: {e}")
             return 0
@@ -63,7 +90,16 @@ class FilmeRepository:
     @staticmethod
     @session_manager
     def delete(where, session):
-        """Deleta registros com base no filtro `where`."""
+        """
+        Remove registros da tabela 'filmes' com base nos critérios fornecidos.
+
+        Args:
+            where (dict): Condições para localizar os registros a serem deletados (exemplo: {"titulo": "Matrix"}).
+            session (Session): Sessão ativa do SQLAlchemy.
+
+        Returns:
+            int: Número de registros removidos.
+        """
         try:
             result = session.query(Filme).filter_by(**where).delete()
             if result:
@@ -78,24 +114,21 @@ class FilmeRepository:
     @staticmethod
     @session_manager
     def get_by_field(session, where, fields=None):
-        """Busca filmes com base nos critérios `where` e retorna os campos especificados (`fields`).
+        """
+        Busca filmes com base nos critérios especificados e retorna os campos solicitados.
 
         Args:
-            session (Session): Sessão do banco de dados.
-            where (dict): Critérios de filtro (ex.: {"ano": 1999, "genero": "Ficção"}).
-            fields (list, optional): Lista de colunas a serem retornadas (ex.: ["titulo", "ano"]).
-                                     Retorna todos os campos se `None`.
+            session (Session): Sessão ativa do SQLAlchemy.
+            where (dict): Critérios de filtro para a consulta (exemplo: {"ano": 1999, "genero": "Ficção"}).
+            fields (list[str], opcional): Lista de colunas a serem retornadas (exemplo: ["titulo", "ano"]).
+                                          Se None, retorna todos os campos.
 
         Returns:
-            list: Lista de dicionários contendo os filmes encontrados.
+            list[dict]: Lista de dicionários representando os filmes encontrados.
         """
         try:
-            query = session.query(Filme)
+            query = session.query(Filme).filter_by(**where)
 
-            # Aplicar filtro (where)
-            query = query.filter_by(**where)
-
-            # Aplicar seleção de colunas (fields)
             if fields:
                 query = query.with_entities(*[getattr(Filme, field) for field in fields])
                 filmes = query.all()
@@ -105,8 +138,7 @@ class FilmeRepository:
                 return [
                     {key: value for key, value in filme.__dict__.items() if key != "_sa_instance_state"}
                     for filme in filmes
-                ]  # 🔥 Remove `_sa_instance_state` antes de retornar
-
+                ]  # Remove `_sa_instance_state` antes de retornar
         except Exception as e:
             print(f"Erro ao buscar filmes: {e}")
             return []
@@ -114,16 +146,30 @@ class FilmeRepository:
     @staticmethod
     @session_manager
     def get_by_titulo(titulo, session):
-        """Busca um filme pelo título e retorna uma cópia desconectada."""
+        """
+        Busca um filme pelo título.
+
+        Args:
+            titulo (str): Nome do filme a ser buscado.
+            session (Session): Sessão ativa do SQLAlchemy.
+
+        Returns:
+            Filme | None: O objeto Filme encontrado ou None se não existir.
+        """
         filme = session.query(Filme).filter(Filme.titulo == titulo).first()
         if filme:
-            session.expunge(filme)  # 🔥 Remove a ligação do objeto com a sessão
+            session.expunge(filme)  # Remove a ligação do objeto com a sessão para evitar efeitos colaterais
         return filme
 
     @staticmethod
     @session_manager
     def print_all(session):
-        """Imprime todos os filmes da tabela."""
+        """
+        Imprime todos os filmes da tabela 'filmes' em formato tabular.
+
+        Args:
+            session (Session): Sessão ativa do SQLAlchemy.
+        """
         filmes = session.query(Filme).all()
         if filmes:
             print()
@@ -136,21 +182,5 @@ class FilmeRepository:
             print("Nenhum filme encontrado na tabela.")
 
 
+# Configuração do logging para capturar erros
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")
-
-@staticmethod
-@session_manager
-def insert(data, session):
-    try:
-        if isinstance(data, list):
-            filmes = [Filme(**filme_data) for filme_data in data]
-            session.bulk_save_objects(filmes)
-            print(f"{len(filmes)} filmes inseridos com sucesso!")
-        else:
-            filme = Filme(**data)
-            session.add(filme)
-            print(f"Filme '{filme.titulo}' inserido com sucesso!")
-        return True
-    except Exception as e:
-        logging.error(f"Erro ao inserir filme(s): {e}")
-        return False
