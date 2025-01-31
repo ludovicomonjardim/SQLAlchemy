@@ -54,9 +54,9 @@ class CinemaSession(Base):
         return value
 
 # Validação antes do commit
-@event.listens_for(CinemaSession, "before_flush")
-def validate_session_before_commit(cinema_session, flush_context, instances):
-    for instance in cinema_session.new | cinema_session.dirty:  # Valida inserções e atualizações
+@event.listens_for(Session, "before_flush")
+def validate_session_before_commit(session, flush_context, instances):
+    for instance in session.new | session.dirty:  # Valida inserções e atualizações
         if isinstance(instance, CinemaSession):
             if not isinstance(instance.capacity, int) or instance.capacity <= 0:
                 raise ValueError("Capacity must be an integer greater than zero.")

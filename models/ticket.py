@@ -7,7 +7,7 @@ class Ticket(Base):
     __tablename__ = "tickets"
 
     id = Column(Integer, primary_key=True, autoincrement=True)
-    session_id = Column(Integer, ForeignKey("sessions.id"), nullable=False)
+    cinema_session_id = Column(Integer, ForeignKey("cinema_sessions.id"), nullable=False)
     customer = Column(String(100), nullable=False)  # Definição explícita como obrigatório
     purchase_date = Column(DateTime, default=func.now(), nullable=False)  # Não pode ser nulo
 
@@ -16,7 +16,7 @@ class Ticket(Base):
     )
 
     def __repr__(self):
-        return f"<Ticket(id={self.id}, session_id={self.session_id}, customer='{self.customer}', purchase_date={self.purchase_date})>"
+        return f"<Ticket(id={self.id}, cinema_session_id={self.cinema_session_id}, customer='{self.customer}', purchase_date={self.purchase_date})>"
 
     @validates("customer")
     def validate_customer(self, key, value):

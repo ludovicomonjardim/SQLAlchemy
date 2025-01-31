@@ -1,10 +1,14 @@
-from models.movie import Movie
 from utils.session import session_manager
 from utils.migration import atualizar_tabela
+from sqlalchemy import select
+from models.movie import Movie
+from models.genre import Genre
+from models.movie_genre import MovieGenre
+
 import logging
 
 
-class movieRepository:
+class MovieRepository:
     """
     Repositório responsável pelas operações de banco de dados para a entidade movie.
 
@@ -12,7 +16,7 @@ class movieRepository:
     """
 
     @staticmethod
-    def atualiza():
+    def update_structure():
         """
         Atualiza a estrutura da tabela 'movies', garantindo que a estrutura seja substituída corretamente.
 
@@ -162,13 +166,50 @@ class movieRepository:
         if movies:
             print()
             print("-" * 51)
-            print(f"{'Título':<30} {'Gênero':<15} {'Ano':<5}")
+            print(f"{'Título':<30} {'Ano':<5}")
             print("-" * 51)
             for movie in movies:
-                print(f"{movie.titulo:<30} {movie.genero:<15} {movie.ano:<5}")
+                print(f"{movie.title:<30} {movie.year:<5}")
         else:
             print("Nenhum movie encontrado na tabela.")
 
+    @staticmethod
+    @session_manager
+    def list_movies_with_genres(session):
+        """
+        Retorna uma lista de filmes com seus respectivos gêneros.
+
+        Args:
+            session (Session): Sessão ativa do SQLAlchemy.
+
+        Returns:
+            list[dict]: Lista de dicionários contendo 'title' e 'genres'.
+        """
+        stmt = (
+            select(Movie.title, Genre.name)
+            .join(MovieGenre, Movie.id == MovieGenre.movie_id)
+            .join(Genre, MovieGenre.genre_id == Genre.id)
+            .order_by(Movie.title)
+        )
+        results = session.execute(stmt).all()
+
+        movies_dict = {}
+        for title, genre in results:
+            if title in movies_dict:
+                movies_dict[title].append(genre)
+            else:
+                movies_dict[title] = genre
+
+        movies_list = []
+        for title, genres in movies_dict.items():
+            movie_entry = {
+                "title": title,
+                "genres": genres
+            }
+            movies_list.append(movie_entry)
+        return movies_list
+
+        # return [{"title": title, "genres": genres} for title, genres in movies_dict.items()]
 
 # Configuração do logging para capturar erros
 logging.basicConfig(level=logging.ERROR, format="%(asctime)s - %(levelname)s - %(message)s")

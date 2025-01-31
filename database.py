@@ -30,7 +30,23 @@ Session = sessionmaker(bind=engine)
 def initialize_database():
     """Cria as tabelas do banco de dados garantindo a ordem correta."""
     print("Criando tabelas na ordem correta...")
-    Base.metadata.create_all(engine)
+    # Base.metadata.create_all(engine)
+
+    # Usando __table__.create() ao invés de Base.metadata.create_all(engine)
+    # para garantir a ordem de criação das tabelas
+    Classification.__table__.create(engine, checkfirst=True)
+    Genre.__table__.create(engine, checkfirst=True)
+    Director.__table__.create(engine, checkfirst=True)
+    Actor.__table__.create(engine, checkfirst=True)
+
+    # Criar tabelas que dependem das anteriores
+    Movie.__table__.create(engine, checkfirst=True)
+    MovieGenre.__table__.create(engine, checkfirst=True)
+    MovieDirector.__table__.create(engine, checkfirst=True)
+    MovieActor.__table__.create(engine, checkfirst=True)
+
+    CinemaSession.__table__.create(engine, checkfirst=True)
+    Ticket.__table__.create(engine, checkfirst=True)
 
     print("Todas as tabelas foram criadas com sucesso!")
 
