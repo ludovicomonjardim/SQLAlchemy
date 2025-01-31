@@ -1,5 +1,5 @@
 from sqlalchemy.orm import DeclarativeBase
 
-# Base declarativa para todos os modelos
+# Declarative base for all models
 class Base(DeclarativeBase):
     pass

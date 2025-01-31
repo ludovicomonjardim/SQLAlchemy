@@ -4,22 +4,20 @@ from contextlib import contextmanager
 from models.base import Base
 import os
 
-# Configuração do banco de dados
+# Database configuration
 DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
-# DATABASE_URL = "postgresql+psycopg2://postgres:admin@localhost:5432/cinema"
 
-# Criação da engine
+# Creating the engine
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=False)
 
-
-# Configuração do sessionmaker
+# Session configuration
 Session = sessionmaker(bind=engine)
 
-# Função para inicializar o banco de dados
+# Function to initialize the database
 def initialize_database():
-    """Cria todas as tabelas no banco de dados com base nos modelos."""
+    """Creates all tables in the database based on the models."""
     Base.metadata.create_all(engine)
-    print("Tabelas criadas com sucesso!")
+    print("Tables successfully created!")
 
 @contextmanager
 def get_connection():
