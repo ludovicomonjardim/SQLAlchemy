@@ -2,6 +2,9 @@
 
 ~~~~ 
 SQLAlchemy/
+├── .github/
+│   ├── workflows
+│       ├── ci-cd.yml
 ├── models/
 │   ├── __init__.py             # Inicializa o pacote models (opcional)
 │   ├── base.py
@@ -22,8 +25,13 @@ SQLAlchemy/
 │   ├── __init__.py             # Inicializa o pacote utils (opcional)
 │   ├── migration.py            # Atualiza automaticamente a estrutura das tabelas no banco
 │   ├── session.py              # Gerenciamento de sessões (decorador)
+├── venv/
 ├── database.py                 # Configuração do banco (engine, conn e sessionmaker)
 ├── main.py                     # Ponto de entrada do programa
+├── populate.py 
+├── .dockerignore 
+├── Dockerfile
+├── requirements.txt
 ~~~~
 
 # Resumo da Função de Cada Arquivo

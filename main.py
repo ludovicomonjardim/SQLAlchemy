@@ -2,6 +2,8 @@ from database import initialize_database, get_connection
 from repositories.movie_repository import MovieRepository
 from sqlalchemy import text
 
+import os
+
 
 def pause(list_all=True):
     """
@@ -13,7 +15,12 @@ def pause(list_all=True):
     """
     if list_all:
         tb_movies.print_all()
-    input("\nPress Enter to continue...")
+
+    # Ignorar input se estiver rodando dentro de um container Docker
+    if os.getenv("DOCKER_ENV") == "true":
+        print("\n[Docker] Ignorando entrada do usuário.")
+    else:
+        input("\nPress Enter to continue...")
     clear_screen()
 
 

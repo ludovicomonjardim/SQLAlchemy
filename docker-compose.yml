@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:latest
+    container_name: sqlalchemy-postgres
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cinema
+    ports:
+      - "5432:5432"
+    healthcheck:  # Adiciona um healthcheck para saber quando o PostgreSQL estiver pronto
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cinema"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  app:
+    build: .
+    container_name: sqlalchemy-app
+    depends_on:
+      db:
+        condition: service_healthy  # Garante que o PostgreSQL esteja pronto antes de iniciar a aplicação
+    environment:
+      DATABASE_URL: postgresql+psycopg2://postgres:admin@db:5432/cinema
+      DOCKER_ENV: "true"
