@@ -4,8 +4,17 @@
 SQLAlchemy/
 ├── models/
 │   ├── __init__.py             # Inicializa o pacote models (opcional)
-│   ├── base.py                 # Base declarativa
-│   ├── filme.py                # Modelo Filme
+│   ├── base.py
+│   ├── genre.py
+│   ├── director.py
+│   ├── actor.py
+│   ├── classification.py
+│   ├── movie.py
+│   ├── movie_genre.py
+│   ├── movie_actor.py
+│   ├── movie_director.py
+│   ├── cinema_session.py
+│   ├── ticket.py
 ├── repositories/
 │   ├── __init__.py             # Inicializa o pacote repositories (opcional)
 │   ├── filme_repository.py     # Repositório para Filme

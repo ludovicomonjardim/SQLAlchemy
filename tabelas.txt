@@ -1,3 +1,6 @@
+BANCO: CINEMA
+SGBD: PostgreSQL
+
 ==================================================================
 GENEROS
 ------------------------------------------------------------------
@@ -5,7 +8,7 @@ Campo	            Tipo	        Constraints                                     D
 ------------------------------------------------------------------
 id	                INT (PK)	    PRIMARY KEY (PK), NOT NULL, AUTO_INCREMENT      Identificador único do gênero
 nome	            VARCHAR(50)	    UNIQUE, NOT NULL                                Nome do gênero (ex.: Ação, Comédia, Drama)
-
+Índice Primário: PRIMARY KEY (id)
 
 ==================================================================
 DIRETORES
@@ -14,7 +17,7 @@ Campo	            Tipo	        Constraints                                     D
 ------------------------------------------------------------------
 id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           Identificador único do diretor
 nome	            VARCHAR(100)	NOT NULL                                        Nome completo do diretor
-
+Índice Primário: PRIMARY KEY (id)
 
 ==================================================================
 ATORES
@@ -23,7 +26,7 @@ Campo	            Tipo	        Constraints                                     D
 ------------------------------------------------------------------
 id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           Identificador único do ator
 nome	            VARCHAR(100)	NOT NULL                                        Nome completo do ator
-
+Índice Primário: PRIMARY KEY (id)
 
 ==================================================================
 FILMES
@@ -38,17 +41,21 @@ sinopse	            TEXT	                                                       
 classificacao_id	INT (FK)	    FOREIGN KEY → CLASSIFICACOES(id), NOT NULL      Classificação indicativa (liga com classificacoes)
 nota                INT             CHECK (nota >= 0 AND nota <= 10)                Nota de avalição do filme
 ativo               BOOLEAN                                                         Filme em cartaz ou não
-
+Índice Primário: PRIMARY KEY (id)
+Índice para busca rápida por título: INDEX (titulo)
+Índice para filtragem por ano: INDEX (ano_lancamento)
+Índice para busca por classificação indicativa: INDEX (classificacao_id)
 
 ==================================================================
 CLASSIFICACOES
 ------------------------------------------------------------------
-Campo	            Tipo	        Constraints                                     Descrição
+Campo	            Tipo	        Constraints                                      Descrição
 ------------------------------------------------------------------
-id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           Identificador único da classificação
-descricao	        VARCHAR(50)	    UNIQUE, NOT NUL                                 Descrição (ex.: Livre, 12 anos)
-idade_minima	    INT	                                                            Idade mínima recomendada
-
+id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT            Identificador único da classificação
+descricao	        VARCHAR(50)	    UNIQUE, NOT NUL                                  Descrição (ex.: Livre, 12 anos)
+idade_minima	    INT	            CHECK (idade_minima >= 0 AND idade_minima <= 18) Idade mínima recomendada
+Índice Primário: PRIMARY KEY (id)
+Índice Único para evitar descrições duplicadas: UNIQUE (descricao)
 
 ==================================================================
 FILMES_GENEROS (Relação entre filmes e gêneros)
@@ -58,8 +65,9 @@ Campo	            Tipo	        Constraints                                     D
 id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           Identificador único
 filme_id	        INT (FK)	    FOREIGN KEY → FILMES(id), NOT NULL              Relaciona com filmes.id
 genero_id	        INT (FK)	    FOREIGN KEY → GENEROS(id), NOT NULL             Relaciona com generos.id
-UNIQUE (filme_id, genero_id) (Evita que um filme tenha um gênero repetido)
-
+UNIQUE (filme_id, genero_id)
+Índice Primário: PRIMARY KEY (id)
+Índice Composto: UNIQUE (filme_id, genero_id)
 
 ==================================================================
 FILMES_ATORES (Relação entre filmes e atores)
@@ -69,9 +77,10 @@ Campo	            Tipo	        Descrição
 id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           Identificador único
 filme_id	        INT (FK)	    FOREIGN KEY → FILMES(id), NOT NULL              Relaciona com filmes.id
 ator_id	            INT (FK)	    FOREIGN KEY → ATORES(id), NOT NULL              Relaciona com atores.id
-papel	            VARCHAR(100)	Papel desempenhado no filme (opcional)
-UNIQUE (filme_id, ator_id) (Evita que o mesmo ator apareça mais de uma vez no mesmo filme)
-
+papel	            VARCHAR(100)	                                                Papel desempenhado no filme (opcional)
+UNIQUE (filme_id, ator_id)
+Índice Primário: PRIMARY KEY (id)
+Índice Composto para busca eficiente: UNIQUE (filme_id, ator_id)
 
 ==================================================================
 FILMES_DIRETORES (Relação entre filmes e diretores)
@@ -81,8 +90,9 @@ Campo	            Tipo	        Descrição
 id	                INT (PK)	    PRIMARY KEY, NOT NULL, AUTO_INCREMENT           Identificador único
 filme_id	        INT (FK)	    FOREIGN KEY → FILMES(id), NOT NULL              Relaciona com filmes.id
 diretor_id	        INT (FK)	    FOREIGN KEY → DIRETORES(id), NOT NULL           Relaciona com diretores.id
-UNIQUE (filme_id, diretor_id) (Evita diretores duplicados no mesmo filme)
-
+UNIQUE (filme_id, diretor_id)
+Índice Primário: PRIMARY KEY (id)
+Índice Composto para eficiência: UNIQUE (filme_id, diretor_id)
 
 ==================================================================
 SESSÕES
@@ -94,9 +104,11 @@ filme_id	        INT (FK)	    FOREIGN KEY → FILMES(id), NOT NULL              
 data	            DATE	        NOT NULL                                        Data da exibição
 horario	            TIME	        NOT NULL                                        Horário da exibição
 sala	            VARCHAR(10)	    NOT NULL                                        Identificação ou nome da sala de exibição
-lotacao	            INT	                                                            Capacidade máxima da sala
-preco	            DECIMAL(6,2)                                                    Valor do ingresso para essa sessão
-
+lotacao	            INT	            CHECK (lotacao > 0)                             Capacidade máxima da sala
+preco	            DECIMAL(6,2)    CHECK (preco >= 0.0)                            Valor do ingresso para essa sessão
+Índice Primário: PRIMARY KEY (id)
+Índice para busca rápida por filme: INDEX (filme_id)
+Índice para otimizar busca por data: INDEX (data)
 
 ==================================================================
 INGRESSOS
@@ -107,6 +119,7 @@ id                  INT (PK)        PRIMARY KEY, NOT NULL, AUTO_INCREMENT       
 sessao_id           INT (FK)        FOREIGN KEY → SESSOES(id), NOT NULL             Relaciona com sessoes.id
 cliente             VARCHAR(100)                                                    Nome do cliente (ou NULL para anonimato)
 data_compra         DATETIME        DEFAULT CURRENT_TIMESTAMP                       Data e hora da compra
-
-
+Índice Primário: PRIMARY KEY (id)
+Índice para busca eficiente por sessão: INDEX (sessao_id)
+Índice para compras recentes: INDEX (data_compra)
 
