@@ -46,6 +46,9 @@ jobs:
           source venv/bin/activate
           pip install --no-cache-dir -r requirements.tx
 
+      - name: Verify pytest installation
+        run: python -m pytest --version
+
       - name: Run Migrations
         env:
           DATABASE_URL: postgresql+psycopg2://postgres:admin@localhost:5432/cinema
@@ -56,7 +59,7 @@ jobs:
 
       - name: Run Tests
         run: |
-          pytest tests --disable-warnings --maxfail=1
+          run: pytest --disable-warnings --maxfail=1
 
   build-and-push:
     name: Build and Push Docker Image
