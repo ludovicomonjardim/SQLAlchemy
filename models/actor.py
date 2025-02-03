@@ -2,6 +2,7 @@ from models.base import Base
 from sqlalchemy import Column, String, Integer, CheckConstraint, event
 from sqlalchemy.orm import validates, Session
 
+
 class Actor(Base):
     __tablename__ = "actors"  # Mantendo consistência com nomes em inglês
 

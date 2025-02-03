@@ -21,6 +21,7 @@ SQLAlchemy/
 │   ├── ticket.py
 ├── repositories/
 │   ├── __init__.py             # Inicializa o pacote repositories (opcional)
+│   ├── actor_repository.py     # Repositório para Atores
 │   ├── movie_repository.py     # Repositório para Filme
 ├── utils/                      # Pasta para utilitários
 │   ├── __init__.py             # Inicializa o pacote utils (opcional)
