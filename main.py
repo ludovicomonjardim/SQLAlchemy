@@ -1,5 +1,6 @@
 from database import initialize_database, get_connection
 from repositories.movie_repository import MovieRepository
+from utils.populate import populate_database
 from sqlalchemy import text
 from time import sleep
 
@@ -37,6 +38,9 @@ def clear_screen():
 
 # Initialize the database
 initialize_database()
+
+# Popula o banco de dados se necessário
+populate_database()  # Chama a função para popular as tabelas essenciai
 
 # Initialize the movie repository and update the table structure
 tb_movies = MovieRepository()

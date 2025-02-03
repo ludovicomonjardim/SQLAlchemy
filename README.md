@@ -26,12 +26,12 @@ SQLAlchemy/
 │   ├── __init__.py             # Inicializa o pacote utils (opcional)
 │   ├── migration.py            # Atualiza automaticamente a estrutura das tabelas no banco
 │   ├── session.py              # Gerenciamento de sessões (decorador)
+│   ├── populate.py 
 ├── .dockerignore 
 ├── database.py                 # Configuração do banco (engine, conn e sessionmaker)
 ├── docker-compose-yml 
 ├── Dockerfile
 ├── main.py                     # Ponto de entrada do programa
-├── populate.py 
 ├── requirements.txt
 ├── wait-for-it.sh
 ~~~~
