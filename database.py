@@ -17,6 +17,10 @@ from models.ticket import Ticket
 
 import os
 
+# from sqlalchemy.orm import sessionmaker
+
+
+
 # Configuração do banco de dados
 if os.getenv("DOCKER_ENV") == "true":
     DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@db:5432/cinema")
@@ -31,6 +35,10 @@ engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=False)
 
 # Criador de sessão
 Session = sessionmaker(bind=engine)
+
+def get_session():
+    """Retorna uma nova sessão do banco de dados."""
+    return Session()
 
 
 def initialize_database():
