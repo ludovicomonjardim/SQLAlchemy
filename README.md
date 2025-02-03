@@ -5,6 +5,7 @@ SQLAlchemy/
 ├── .github/
 │   ├── workflows
 │       ├── ci-cd.yml
+├── venv/
 ├── models/
 │   ├── __init__.py             # Inicializa o pacote models (opcional)
 │   ├── base.py
@@ -20,18 +21,19 @@ SQLAlchemy/
 │   ├── ticket.py
 ├── repositories/
 │   ├── __init__.py             # Inicializa o pacote repositories (opcional)
-│   ├── filme_repository.py     # Repositório para Filme
+│   ├── movie_repository.py     # Repositório para Filme
 ├── utils/                      # Pasta para utilitários
 │   ├── __init__.py             # Inicializa o pacote utils (opcional)
 │   ├── migration.py            # Atualiza automaticamente a estrutura das tabelas no banco
 │   ├── session.py              # Gerenciamento de sessões (decorador)
-├── venv/
+├── .dockerignore 
 ├── database.py                 # Configuração do banco (engine, conn e sessionmaker)
+├── docker-compose-yml 
+├── Dockerfile
 ├── main.py                     # Ponto de entrada do programa
 ├── populate.py 
-├── .dockerignore 
-├── Dockerfile
 ├── requirements.txt
+├── wait-for-it.sh
 ~~~~
 
 # Resumo da Função de Cada Arquivo

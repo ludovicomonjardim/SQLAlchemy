@@ -4,14 +4,14 @@ FROM python:3.12
 # Definir o diretório de trabalho dentro do container
 WORKDIR /app
 
-# Copiar script de espera
-COPY wait-for-it.sh /app/wait-for-it.sh
-
-# Definir permissões dentro do Docker (funciona no Windows)
-RUN chmod +x /app/wait-for-it.sh
+# Instalar o cliente PostgreSQL (para usar pg_isready)
+RUN apt-get update && apt-get install -y postgresql-client
 
 # Copiar os arquivos do projeto para dentro do container
 COPY . /app
+
+# Ajustar permissões do wait-for-it.sh
+RUN chmod +x /app/wait-for-it.sh
 
 # Criar e ativar o ambiente virtual
 RUN python -m venv venv
@@ -23,4 +23,6 @@ RUN /bin/bash -c "source venv/bin/activate && pip install --no-cache-dir -r requ
 ENV PYTHONUNBUFFERED=1
 
 # Comando para rodar a aplicação, esperando o PostgreSQL ficar pronto antes de iniciar
-CMD ["/app/wait-for-it.sh", "db", "5432", "--", "/bin/bash", "-c", "source venv/bin/activate && python main.py"]
+#CMD ["/bin/bash", "-c", "/app/wait-for-it.sh db 5432 -- /bin/bash -c 'source venv/bin/activate && python main.py'"]
+CMD ["/bin/bash", "-c", "/app/wait-for-it.sh db 5432 && exec /bin/bash -c 'source venv/bin/activate && python main.py'"]
+

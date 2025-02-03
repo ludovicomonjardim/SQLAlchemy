@@ -18,8 +18,14 @@ from models.ticket import Ticket
 import os
 
 # Configuração do banco de dados
-# DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@db:5432/cinema")
+if os.getenv("DOCKER_ENV") == "true":
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@db:5432/cinema")
+else:
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
+
+print(f"Using database URL: {DATABASE_URL}")
+
+
 # Criando a engine
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=False)
 

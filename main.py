@@ -1,9 +1,12 @@
 from database import initialize_database, get_connection
 from repositories.movie_repository import MovieRepository
 from sqlalchemy import text
+from time import sleep
 
 import os
 
+print(f'\nDOCKER_ENV: {os.getenv("DOCKER_ENV")}\n')
+sleep(2)
 
 def pause(list_all=True):
     """
