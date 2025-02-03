@@ -42,9 +42,8 @@ jobs:
       - name: Install Dependencies
         run: |
           python -m venv venv
-          echo "source venv/bin/activate" >> $GITHUB_ENV
           source venv/bin/activate
-          pip install --no-cache-dir -r requirements.tx
+          pip install --no-cache-dir -r requirements.txt
 
       - name: Run Migrations
         env:
@@ -54,13 +53,22 @@ jobs:
           python database.py
 
       - name: Verify pytest installation
-        run: python -m pytest --version
+        run: |
+          source venv/bin/activate
+          python -m pytest --version
 
       - name: List project directory
         run: ls -R
 
+      - name: Check pytest test discovery
+        run: |
+          source venv/bin/activate
+          pytest --collect-only
+
       - name: Run Tests
-        run: pytest tests/ --disable-warnings --maxfail=1
+        run: |
+          source venv/bin/activate
+          pytest tests/ --disable-warnings --maxfail=1 -v
 
 
   build-and-push:
