@@ -45,14 +45,14 @@ class MovieRepository:
             if isinstance(data, list):
                 movies = [Movie(**movie_data) for movie_data in data]
                 session.bulk_save_objects(movies)
-                print(f"{len(movies)} movies inseridos com sucesso!")
+                print(f"{len(movies)} filmes inseridos com sucesso!")
             else:
                 movie = Movie(**data)
                 session.add(movie)
-                print(f"movie '{movie.title}' inserido com sucesso!")
+                print(f"Filme '{movie.title}' inserido com sucesso!")
             return True
         except Exception as e:
-            print(f"Erro ao inserir movie(s): {e}")
+            print(f"Erro ao inserir filme(s): {e}")
             return False
 
     @staticmethod
@@ -72,11 +72,11 @@ class MovieRepository:
         try:
             result = session.query(Movie).filter_by(**where).update(with_, synchronize_session=False)
             session.commit()
-            print(f"{result} movie(s) atualizado(s) com sucesso.")
+            print(f"{result} filme(s) atualizado(s) com sucesso.")
             return result
         except Exception as e:
             session.rollback()
-            print(f"Erro ao atualizar movie: {e}")
+            print(f"Erro ao atualizar filme(s): {e}")
             return 0
 
     @staticmethod
@@ -95,12 +95,12 @@ class MovieRepository:
         try:
             result = session.query(Movie).filter_by(**where).delete()
             if result:
-                print(f"movie deletado com sucesso! {result} registro(s) removido(s).")
+                print(f"Filme deletado com sucesso! {result} registro(s) removido(s).")
             else:
-                print("Nenhum movie encontrado para deleção.")
+                print("Nenhum filme encontrado para deleção.")
             return result
         except Exception as e:
-            print(f"Erro ao deletar movie: {e}")
+            print(f"Erro ao deletar filme: {e}")
             return 0
 
     @staticmethod
@@ -132,7 +132,7 @@ class MovieRepository:
                     for movie in movies
                 ]  # Remove `_sa_instance_state` antes de retornar
         except Exception as e:
-            print(f"Erro ao buscar movies: {e}")
+            print(f"Erro ao buscar filmes: {e}")
             return []
 
     @staticmethod
@@ -171,7 +171,7 @@ class MovieRepository:
             for movie in movies:
                 print(f"{movie.title:<30} {movie.year:<5}")
         else:
-            print("Nenhum movie encontrado na tabela.")
+            print("Nenhum filme encontrado na tabela.")
 
     @staticmethod
     @session_manager
