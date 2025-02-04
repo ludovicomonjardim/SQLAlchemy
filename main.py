@@ -1,5 +1,6 @@
 from database import initialize_database, get_connection
 from repositories.movie_repository import MovieRepository
+from repositories.genre_repository import GenreRepository
 from utils.populate import populate_database
 from sqlalchemy import text
 from time import sleep
@@ -44,6 +45,7 @@ populate_database()  # Chama a função para popular as tabelas essenciai
 
 # Initialize the movie repository and update the table structure
 tb_movies = MovieRepository()
+tb_genre = GenreRepository()
 
 movies = tb_movies.list_movies_with_genres()
 print(f"{'Filme':<50} Gênero")
@@ -76,6 +78,11 @@ pause(False)
 print("\nLISTING all movies...")
 tb_movies.print_all()
 pause(False)
+
+print("\nLISTING all Genre...")
+tb_genre.print_all()
+pause(False)
+
 
 
 # INSERT

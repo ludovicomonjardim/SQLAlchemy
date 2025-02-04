@@ -2,7 +2,7 @@ from repositories.crud_base_repository import CrudBaseRepository
 from models.genre import Genre
 from utils.session import session_manager
 
-class GenreRepositoryCrud(CrudBaseRepository):
+class GenreRepository(CrudBaseRepository):
     model = Genre
 
     @staticmethod
