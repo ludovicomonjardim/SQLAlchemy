@@ -3,7 +3,15 @@ from utils.migration import atualizar_tabela
 from sqlalchemy import select
 from models.movie import Movie
 from models.genre import Genre
+
 from models.movie_genre import MovieGenre
+
+from repositories.movie_actor_repository import MovieActorRepository
+from repositories.movie_director_repository import MovieDirectorRepository
+from repositories.movie_genre_repository import MovieGenreRepository
+from repositories.cinema_session_repository import CinemaSessionRepository
+from repositories.ticket_repository import TicketRepository
+
 
 import logging
 
@@ -82,24 +90,39 @@ class MovieRepository:
     @staticmethod
     @session_manager
     def delete(where, session):
-        """
-        Remove registros da tabela 'movies' com base nos critérios fornecidos.
-
-        Args:
-            where (dict): Condições para localizar os registros a serem deletados (exemplo: {"titulo": "Matrix"}).
-            session (Session): Sessão ativa do SQLAlchemy.
-
-        Returns:
-            int: Número de registros removidos.
-        """
         try:
-            result = session.query(Movie).filter_by(**where).delete()
-            if result:
-                print(f"Filme deletado com sucesso! {result} registro(s) removido(s).")
-            else:
+            # Buscar o filme a ser excluído
+            movie = session.query(Movie).filter_by(**where).first()
+            if not movie:
                 print("Nenhum filme encontrado para deleção.")
-            return result
+                return 0
+
+            # Criar instâncias dos repositórios
+            tb_movie_actor = MovieActorRepository()
+            tb_movie_director = MovieDirectorRepository()
+            tb_movie_genre = MovieGenreRepository()
+            tb_cinema_session = CinemaSessionRepository()
+            tb_ticket = TicketRepository()
+
+            # Remover associações de atores, diretores e gêneros do filme
+            tb_movie_actor.delete(where={"movie_id": movie.id})
+            tb_movie_director.delete(where={"movie_id": movie.id})
+            tb_movie_genre.delete(where={"movie_id": movie.id})
+
+            # Remover sessões de cinema associadas ao filme
+            cinema_sessions = session.query(CinemaSession).filter_by(movie_id=movie.id).all()
+            for session_ in cinema_sessions:
+                tb_ticket.delete(where={"cinema_session_id": session_.id})
+
+            tb_cinema_session.delete(where={"movie_id": movie.id})
+
+            # Agora podemos excluir o filme
+            session.delete(movie)
+            print(f"Filme '{movie.title}' e todas as suas associações foram removidos com sucesso.")
+            return 1
+
         except Exception as e:
+            session.rollback()
             print(f"Erro ao deletar filme: {e}")
             return 0
 

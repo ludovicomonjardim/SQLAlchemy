@@ -1,4 +1,5 @@
 from utils.session import session_manager
+from database import get_session
 
 class CrudBaseRepository:
     model = None  # Deve ser sobrescrito nas subclasses
@@ -6,6 +7,8 @@ class CrudBaseRepository:
     @staticmethod
     @session_manager
     def insert(data, session):
+        if CrudBaseRepository.model == None:
+            raise "Error - No model defined."
         try:
             if isinstance(data, list):
                 if not all(isinstance(obj, dict) for obj in data):
@@ -71,6 +74,22 @@ class CrudBaseRepository:
             print(f"{result} registro(s) deletado(s) com sucesso.")
             return result
         except Exception as e:
+            print(f"Erro ao deletar: {e}")
+            return 0
+
+    @staticmethod
+    @session_manager
+    def delete(where, session=None):
+        if not session:
+            session = get_session()  # Criar sessão apenas se não for fornecida
+
+        try:
+            result = session.query(CrudBaseRepository.model).filter_by(**where).delete()
+            session.commit()
+            print(f"{result} registro(s) deletado(s) com sucesso.")
+            return result
+        except Exception as e:
+            session.rollback()
             print(f"Erro ao deletar: {e}")
             return 0
 
