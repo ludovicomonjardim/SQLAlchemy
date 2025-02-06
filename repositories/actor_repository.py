@@ -1,7 +1,8 @@
 from repositories.crud_base_repository import CrudBaseRepository
 from models.actor import Actor
+from models.movie_actor import MovieActor
 from utils.session import session_manager
-
+from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 class ActorRepository(CrudBaseRepository):
     model = Actor  # Definição do modelo correto
@@ -29,3 +30,35 @@ class ActorRepository(CrudBaseRepository):
         else:
             print(f"Ator '{data['name']}' inserido com sucesso.")
         return result
+
+    @session_manager
+    def delete(self, where, session):
+        """
+        Exclui um ator e também remove suas associações na tabela movie_actors.
+
+        :param where: Dicionário com as condições para exclusão do ator.
+        :param session: Sessão do banco (gerenciada automaticamente).
+        :return: Mensagem indicando sucesso ou erro.
+        """
+        try:
+            # Buscar o ator antes de excluir
+            actor_to_delete = session.query(Actor).filter_by(**where).first()
+            if not actor_to_delete:
+                return "Erro: Ator não encontrado."
+
+            # Remover todas as associações do ator na tabela movie_actors
+            session.query(MovieActor).filter_by(actor_id=actor_to_delete.id).delete()
+
+            # Agora podemos remover o ator com segurança
+            result = super().delete(where)
+
+            if isinstance(result, str):  # Se `session_manager` retornou um erro
+                return result
+
+            return f"Ator '{actor_to_delete.name}' e suas associações foram removidos com sucesso."
+
+        except IntegrityError:
+            return "Erro: Não foi possível excluir o ator devido a restrições de integridade."
+
+        except SQLAlchemyError:
+            return "Erro inesperado ao tentar excluir o ator."

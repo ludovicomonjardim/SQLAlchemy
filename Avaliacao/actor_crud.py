@@ -9,6 +9,9 @@ class ActorCrud:
 
         self.list_all()
         self.insert("Tom Hanks")
+        self.delete(self.new_id)
+
+
 
     def list_all(self):
         print(f"\nLISTING all from {self.tabel_name}...")
@@ -20,15 +23,14 @@ class ActorCrud:
         self.new_id = self.table.get_by_field(where={"name": name}, fields=["id"])
 
         self.new_id = self.new_id[0]["id"]
-
-        print(f"self.new_id: {self.new_id}")
-
+        print(f"\nId de {name}: {self.new_id}")
 
         return self.new_id
 
     def delete(self, record_id):
-        print(f"\nDELETING a record in {self.tabel_name}...")
-        self.table.delete(where = {"id": record_id})
+        print(f"\nDELETING actor ID {record_id}...")
+        message = self.table.delete({"id": record_id})
+        print(message)  # Exibe a resposta amigável
 
     def update(self):
         print(f"\nINSERTING a new record in {self.tabel_name}...")
