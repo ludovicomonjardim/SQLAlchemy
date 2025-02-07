@@ -8,6 +8,7 @@ from repositories.movie_genre_repository import MovieGenreRepository
 from repositories.actor_repository import ActorRepository
 
 from Avaliacao.actor_crud import ActorCrud
+from Avaliacao.director_crud import DirectorCrud
 
 import os
 
@@ -35,6 +36,7 @@ initialize_database()
 # populate_database()  # Chama a função para popular as tabelas essenciai
 
 ActorCrud()
+DirectorCrud()
 
 
 # Initialize the movie repository and update the table structure

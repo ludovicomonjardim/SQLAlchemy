@@ -8,18 +8,17 @@ class DirectorRepository(CrudBaseRepository):
 
     @staticmethod
     @session_manager
-    def print_all(session):
-        # Exibe todos os gêneros cadastrados no banco de dados.
+    def report(session):
+        # Exibe todos os diretores cadastrados no banco de dados.
         directors = session.query(Director).all()
         if directors:
-            print()
-            print("-" * 30)
-            print(f"{'Id':<5} {'Nome':<20}")
-            print("-" * 30)
+            print("-" * 51)
+            print(f"{'Id':<5} {'Nome':<45}")
+            print("-" * 51)
             for director in directors:
-                print(f"{director.id:<5} {director.name:<20}")
+                print(f"{director.id:<5} {director.name:<45}")
         else:
-            print("Nenhum ator encontrado na tabela.")
+            print("Nenhum diretor encontrado na tabela.")
 
     @session_manager
     def delete(self, where, session):
@@ -48,5 +47,5 @@ class DirectorRepository(CrudBaseRepository):
         if isinstance(result, str):  # Se `session_manager` retornou um erro
             return result
 
-        return f"Ator '{director_to_delete.name}' e suas associações foram removidos com sucesso."
+        return f"Diretor '{director_to_delete.name}' e suas associações foram removidos com sucesso."
 
