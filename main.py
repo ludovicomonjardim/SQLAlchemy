@@ -9,6 +9,7 @@ from repositories.actor_repository import ActorRepository
 
 from Avaliacao.actor_crud import ActorCrud
 from Avaliacao.director_crud import DirectorCrud
+from Avaliacao.genre_crud import GenreCrud
 
 import os
 
@@ -37,6 +38,7 @@ initialize_database()
 
 ActorCrud()
 DirectorCrud()
+GenreCrud()
 
 
 # Initialize the movie repository and update the table structure
