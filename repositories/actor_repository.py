@@ -1,20 +1,17 @@
 from repositories.crud_base_repository import CrudBaseRepository
 from repositories.movie_actor_repository import MovieActorRepository
 from models.actor import Actor
-# from models.movie_actor import MovieActor
 from utils.session import session_manager
-# from sqlalchemy.exc import IntegrityError, SQLAlchemyError
 
 class ActorRepository(CrudBaseRepository):
     model = Actor  # Definição do modelo correto
 
     @staticmethod
     @session_manager
-    def print_all(session):
+    def report(session):
         """Exibe todos os atores cadastrados."""
         actors = session.query(Actor).all()
         if actors:
-            print()
             print("-" * 51)
             print(f"{'ID':<5} {'Nome':<45}")
             print("-" * 51)
@@ -22,15 +19,6 @@ class ActorRepository(CrudBaseRepository):
                 print(f"{actor.id:<5} {actor.name:<45}")
         else:
             print("Nenhum ator encontrado na tabela.")
-
-    @session_manager
-    def insert(self, data, session):
-        result = super().insert(data)
-        if isinstance(result, str):  # Se `session_manager` retornou um erro, exibimos a mensagem
-            print(result)  # Exibe a mensagem de erro
-        else:
-            print(f"Ator '{data['name']}' inserido com sucesso.")
-        return result
 
     @session_manager
     def delete(self, where, session):
@@ -43,12 +31,13 @@ class ActorRepository(CrudBaseRepository):
         """
         # Buscar o ator antes de excluir
         actor_to_delete = session.query(Actor).filter_by(**where).first()
+
         if not actor_to_delete:
             return "Erro: Ator não encontrado."
 
         # Remover todas as associações do ator na tabela movie_actors usando MovieActorRepository
         movie_actor_repo = MovieActorRepository()
-        result_associations = movie_actor_repo.delete({"id": actor_to_delete.id})
+        result_associations = movie_actor_repo.delete({"id": actor_to_delete.id}, ignore_if_not_found=True)
 
         # Verifica se houve erro ao excluir as associações
         if isinstance(result_associations, str):  # Se `delete` retornou um erro

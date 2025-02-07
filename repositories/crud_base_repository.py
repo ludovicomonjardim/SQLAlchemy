@@ -1,6 +1,9 @@
 from utils.session import session_manager
 from utils.migration import atualizar_tabela
 from database import get_session
+from sqlalchemy.exc import IntegrityError, DataError, OperationalError, ProgrammingError, DatabaseError, SQLAlchemyError
+from sqlalchemy.orm import Session
+from sqlalchemy import and_, or_
 
 class CrudBaseRepository:
     model = None  # Deve ser sobrescrito nas subclasses
@@ -35,9 +38,13 @@ class CrudBaseRepository:
                 instance = cls.model(**data)
                 session.add(instance)
                 session.flush()  # Garante que o ID seja gerado
-                return instance.id  # Retorna o ID inserido
+                return [instance.id]  # Retorna o ID inserido
 
             return "Erro: O formato de entrada não é válido."
+
+        except IntegrityError as e:
+            session.rollback()
+            return "Erro: Violação de integridade. Registro duplicado ou dados inválidos."
 
         except Exception as e:
             return f"Erro ao inserir: {e}"
@@ -65,7 +72,7 @@ class CrudBaseRepository:
 
     @classmethod
     @session_manager
-    def delete(cls, where, session):
+    def delete(cls, where, session, ignore_if_not_found=False):
         """Deleta registros com base em um critério e retorna True se for bem-sucedido ou uma mensagem de erro."""
         if not cls.model:
             return "Erro: Nenhum modelo foi definido para esta operação."
@@ -74,7 +81,8 @@ class CrudBaseRepository:
             result = session.query(cls.model).filter_by(**where).delete()
 
             if result == 0:
-                return "Nenhum registro encontrado para exclusão."
+                if not ignore_if_not_found:
+                    return "Nenhum registro encontrado para exclusão."
 
             return True  # Indica que a exclusão foi bem-sucedida
 
@@ -83,28 +91,58 @@ class CrudBaseRepository:
 
     @classmethod
     @session_manager
-    def get_by_field(cls, session, where, fields=None):
-        """Busca registros pelo campo especificado e retorna uma lista de dicionários ou uma mensagem de erro."""
+    def obtain(cls, session, where=None, fields=None, order_by=None, limit=None, offset=None, filters=None):
+        """Busca registros com opções mais flexíveis.
+
+        Parâmetros:
+        - `where` (dict): Condições de igualdade (ex.: {"name": "John"}).
+        - `fields` (list): Lista de colunas a serem retornadas (ex.: ["id", "name"]).
+        - `order_by` (list): Lista de colunas para ordenar (ex.: ["name desc"]).
+        - `limit` (int): Número máximo de registros a retornar.
+        - `offset` (int): Número de registros a pular (paginação).
+        - `filters` (list): Lista de expressões SQLAlchemy para filtros mais avançados.
+
+        Retorna:
+        - Lista de dicionários com os registros encontrados.
+        """
         if not cls.model:
-            return "Erro: Nenhum modelo foi definido para esta operação."
+            return "Erro: Nenhum modelo definido."
 
-        if not isinstance(where, dict):
-            return "Erro: O critério de busca deve ser um dicionário."
+        query = session.query(cls.model)
 
-        try:
-            query = session.query(cls.model).filter_by(**where)
+        # Aplicar filtros simples de igualdade
+        if where and isinstance(where, dict):
+            query = query.filter_by(**where)
 
-            if fields:
-                valid_fields = [field for field in fields if hasattr(cls.model, field)]
-                if not valid_fields:
-                    return []
+        # Aplicar filtros personalizados (ex.: LIKE, >, <, IN)
+        if filters and isinstance(filters, list):
+            query = query.filter(and_(*filters))  # Combina múltiplas condições com AND
 
-                query = query.with_entities(*[getattr(cls.model, field) for field in valid_fields])
-                return [dict(zip(valid_fields, obj)) for obj in query.all()]
-            else:
-                return [
-                    {key: value for key, value in obj.__dict__.items() if key != "_sa_instance_state"}
-                    for obj in query.all()
-                ]
-        except Exception as e:
-            return f"Erro ao buscar registros: {e}"
+        # Selecionar campos específicos
+        if fields:
+            valid_fields = [getattr(cls.model, field) for field in fields if hasattr(cls.model, field)]
+            if valid_fields:
+                query = query.with_entities(*valid_fields)
+
+        # Aplicar ordenação
+        if order_by:
+            order_criteria = []
+            for field in order_by:
+                field_name, *direction = field.split()
+                if hasattr(cls.model, field_name):
+                    column = getattr(cls.model, field_name)
+                    order_criteria.append(column.desc() if "desc" in direction else column.asc())
+            if order_criteria:
+                query = query.order_by(*order_criteria)
+
+        # Aplicar paginação
+        if limit:
+            query = query.limit(limit)
+        if offset:
+            query = query.offset(offset)
+
+        # Executar consulta e converter resultados para dicionário
+        results = query.all()
+        return [dict(zip(fields, obj)) for obj in results] if fields else [
+            {key: value for key, value in obj.__dict__.items() if key != "_sa_instance_state"} for obj in results
+        ]
