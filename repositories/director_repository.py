@@ -1,21 +1,52 @@
 from repositories.crud_base_repository import CrudBaseRepository
-from models.actor import Actor
+from repositories.movie_director_repository import MovieDirectorRepository
+from models.director import Director
 from utils.session import session_manager
 
-class ActorRepository(CrudBaseRepository):
-    model = Actor
+class DirectorRepository(CrudBaseRepository):
+    model = Director
 
     @staticmethod
     @session_manager
     def print_all(session):
         # Exibe todos os gêneros cadastrados no banco de dados.
-        actors = session.query(Actor).all()
-        if actors:
+        directors = session.query(Director).all()
+        if directors:
             print()
             print("-" * 30)
             print(f"{'Id':<5} {'Nome':<20}")
             print("-" * 30)
-            for actor in actors:
-                print(f"{actor.id:<5} {actor.name:<20}")
+            for director in directors:
+                print(f"{director.id:<5} {director.name:<20}")
         else:
             print("Nenhum ator encontrado na tabela.")
+
+    @session_manager
+    def delete(self, where, session):
+        """
+        Exclui um diretor e também remove suas associações na tabela movie_director.
+
+        :param where: Dicionário com as condições para exclusão do ator.
+        :param session: Sessão do banco (gerenciada automaticamente).
+        :return: Mensagem indicando sucesso ou erro.
+        """
+        director_to_delete = session.query(Director).filter_by(**where).first()
+        if not director_to_delete:
+            return "Erro: Diretor não encontrado."
+
+        # Remover todas as associações do ator na tabela movie_directors usando MovieDirectorRepository
+        movie_director_repo = MovieDirectorRepository()
+        result_associations = movie_director_repo.delete({"id": director_to_delete.id})
+
+        # Verifica se houve erro ao excluir as associações
+        if isinstance(result_associations, str):  # Se `delete` retornou um erro
+            return result_associations  # Retorna a mensagem de erro
+
+        # Agora podemos remover o ator com segurança
+        result = super().delete(where)
+
+        if isinstance(result, str):  # Se `session_manager` retornou um erro
+            return result
+
+        return f"Ator '{director_to_delete.name}' e suas associações foram removidos com sucesso."
+
