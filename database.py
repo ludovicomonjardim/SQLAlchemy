@@ -14,10 +14,13 @@ from models.movie_director import MovieDirector
 from models.movie_genre import MovieGenre
 from models.cinema_session import CinemaSession
 from models.ticket import Ticket
-
 import os
 
-# from sqlalchemy.orm import sessionmaker
+import logging
+from utils.logging_config import setup_logger
+
+# Configura o logger
+setup_logger()
 
 
 
@@ -27,7 +30,7 @@ if os.getenv("DOCKER_ENV") == "true":
 else:
     DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
 
-print(f"Using database URL: {DATABASE_URL}")
+logging.info(f"Using database URL: {DATABASE_URL}")
 
 
 # Criando a engine
@@ -43,7 +46,7 @@ def get_session():
 
 def initialize_database():
     """Cria as tabelas do banco de dados garantindo a ordem correta."""
-    print("Criando tabelas na ordem correta...")
+    logging.info("Criando tabelas na ordem correta...")
     # Base.metadata.create_all(engine)
 
     # Usando __table__.create() ao invés de Base.metadata.create_all(engine)
@@ -62,7 +65,7 @@ def initialize_database():
     CinemaSession.__table__.create(engine, checkfirst=True)
     Ticket.__table__.create(engine, checkfirst=True)
 
-    print("Todas as tabelas foram criadas com sucesso!")
+    logging.info("Todas as tabelas foram criadas com sucesso!")
 
 
 @contextmanager
