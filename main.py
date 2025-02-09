@@ -1,6 +1,12 @@
+"""
+main.py
+Este módulo é o ponto de entrada da aplicação.
+"""
 from database import initialize_database
 from utils.populate import populate_database
 from Avaliacao.actor_crud import ActorCrud
+from Avaliacao.director_crud import DirectorCrud
+from Avaliacao.genre_crud import GenreCrud
 
 import logging
 from utils.logging_config import setup_logger
@@ -21,6 +27,8 @@ def main():
         # Inicializa os CRUDs
         logging.info("Inicializando CRUDs...")
         ActorCrud()
+        DirectorCrud()
+        GenreCrud()
 
         logging.info("Aplicação inicializada com sucesso!")
     except Exception as e:

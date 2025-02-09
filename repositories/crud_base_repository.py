@@ -113,28 +113,26 @@ class CrudBaseRepository:
 
         try:
             if isinstance(where, dict):
-                # Excluir um único registro se where for dicionário
+                # 🔹 Excluir um único registro se where for dicionário
                 query = session.query(cls.model).filter_by(**where)
             elif isinstance(where, list) and where:
-                # Excluir múltiplos registros se where for uma lista de expressões
+                # 🔹 Excluir múltiplos registros se where for uma lista de expressões
                 query = session.query(cls.model).filter(*where)
             else:
                 return {"success": False,
                         "error": "Erro: O parâmetro 'where' deve ser um dicionário ou uma lista de filtros."}
 
-            # Exclui os registros.
+            # Executa a exclusão
             deleted_count = query.delete(synchronize_session=False)
 
-            # Verifica se nenhum registro foi excluído.
+            # Verifica se nenhum registro foi excluído
             if deleted_count == 0 and not ignore_if_not_found:
-
                 return {"success": False, "error": "Nenhum registro encontrado para exclusão."}
 
-            # Indica sucesso e retorna a contagem de exclusões.
+            # Retorna a quantidade de registros excluídos
             return {"success": True, "deleted_count": deleted_count}
 
         except Exception as e:
-            # Captura qualquer exceção genérica.
             return {"success": False, "error": f"Erro ao excluir registros: {e}"}
 
     @classmethod

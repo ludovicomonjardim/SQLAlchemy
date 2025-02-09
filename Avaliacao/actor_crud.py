@@ -25,11 +25,11 @@ class ActorCrud:
         self.delete()
         self.report()
 
-        # self.insert_multi()
-        # self.report()
-        #
-        # self.delete_multi()
-        # self.report()
+        self.insert_multi()
+        self.report()
+
+        self.delete_multi()
+        self.report()
 
         self.select()
 
@@ -88,6 +88,11 @@ class ActorCrud:
         print(f"\nDELETE - {self.tabel_name.upper()}")
         result = self.table_repo.delete(where={"id": self.ids_inserted})
 
+        # result = self.table_repo.delete(where={"id": 139})
+        # result = self.table_repo.delete(where={"id": 140})
+        # result = self.table_repo.delete(where={"id": 141})
+        # result = self.table_repo.delete(where={"id": 142})
+
         if result["success"]:
             print("Exclusão bem-sucedida.")
         else:
@@ -96,13 +101,14 @@ class ActorCrud:
     def delete_multi(self):
         print(f"\nDELETE MULTI - {self.tabel_name.upper()}")
 
-        if not hasattr(self, "ids_inserted_multi") or not self.ids_inserted_multi:
+        if not self.ids_inserted_multi:
             print("Nenhum ID armazenado para exclusão.")
             return
 
-        # Chamando a função de exclusão múltipla
-        filters = [Actor.id.in_(self.ids_inserted_multi)]  # Cria um filtro para excluir os IDs inseridos
+        # Criando filtro para excluir múltiplos IDs
+        filters = [Actor.id.in_(self.ids_inserted_multi)]
 
+        # Chamando a função de exclusão múltipla
         result = self.table_repo.delete(filters)
 
         if result["success"]:

@@ -42,31 +42,47 @@ class ActorRepository(CrudBaseRepository):
     @session_manager(commit=True)  # Dá commit, pois altera dados
     def delete(self, where, session):
         """
-        Exclui um ator e suas associações com filmes.
-        - Recebe um dicionário 'where' com critérios para localizar o ator.
-        - Remove as associações do ator com filmes antes de excluí-lo.
+        Exclui um ou mais atores e suas associações com filmes.
+        - Recebe `where`, que pode ser um dicionário (exclusão única) ou uma lista de filtros (exclusão múltipla).
+        - Remove as associações antes de excluir o ator.
         - Retorna um dicionário indicando sucesso ou falha da operação.
         """
 
-        # Busca o ator com base nos critérios fornecidos.
-        actor_to_delete = session.query(Actor).filter_by(**where).first()
-        if not actor_to_delete:
-            # Retorna erro se o ator não for encontrado.
-            return {"success": False, "error": "Erro: Ator não encontrado."}
+        if not where:
+            return {"success": False, "error": "Erro: Nenhum critério de exclusão fornecido."}
 
-        # Instancia o repositório para gerenciar associações entre filmes e atores.
-        movie_actor_repo = MovieActorRepository()
-        # Remove as associações do ator.
-        result_associations = movie_actor_repo.delete({"id": actor_to_delete.id}, ignore_if_not_found=True)
-        if not result_associations["success"]:
-            # Retorna o erro ocorrido durante a remoção das associações.
-            return result_associations
+        try:
+            # Se `where` for um dicionário, usa `filter_by`
+            if isinstance(where, dict):
+                actor_to_delete = session.query(Actor).filter_by(**where).first()
+                if not actor_to_delete:
+                    return {"success": False, "error": "Erro: Ator não encontrado."}
 
-        # Chama o delete da classe pai (CrudBaseRepository) para remover o ator.
-        result = super().delete(where)
-        if not result["success"]:
-            # Retorna o erro ocorrido durante a exclusão do ator.
-            return result
+                # Exclui associações do ator antes de removê-lo
+                movie_actor_repo = MovieActorRepository()
+                result_associations = movie_actor_repo.delete({"id": actor_to_delete.id}, ignore_if_not_found=True)
+                if not result_associations["success"]:
+                    return result_associations
 
-        # Retorna mensagem de sucesso.
-        return {"success": True, "message": f"Ator '{actor_to_delete.name}' removido com sucesso."}
+                result = super().delete(where)
+                if not result["success"]:
+                    return result
+
+                return {"success": True, "message": f"Ator '{actor_to_delete.name}' removido com sucesso."}
+
+            # Se `where` for uma lista, usa `filter`
+            elif isinstance(where, list):
+                query = session.query(Actor).filter(*where)
+                deleted_count = query.delete(synchronize_session=False)
+
+                if deleted_count == 0:
+                    return {"success": False, "error": "Nenhum ator encontrado para exclusão."}
+
+                return {"success": True, "deleted_count": deleted_count}
+
+            else:
+                return {"success": False,
+                        "error": "Erro: O parâmetro `where` deve ser um dicionário ou uma lista de filtros."}
+
+        except Exception as e:
+            return {"success": False, "error": f"Erro ao excluir registros: {e}"}
