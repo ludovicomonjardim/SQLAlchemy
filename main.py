@@ -8,6 +8,7 @@ from Avaliacao.actor_crud import ActorCrud
 from Avaliacao.director_crud import DirectorCrud
 from Avaliacao.genre_crud import GenreCrud
 from Avaliacao.classification_crud import ClassificationCrud
+from Avaliacao.cinema_session_crud import CinemaSessionCrud
 
 import logging
 from utils.logging_config import setup_logger
@@ -30,9 +31,10 @@ def main():
         # ActorCrud()
         # DirectorCrud()
         # GenreCrud()
-        ClassificationCrud()
+        # ClassificationCrud()
+        CinemaSessionCrud()
 
-        logging.info("Aplicação inicializada com sucesso!")
+        logging.info("Cruds realizados com sucesso!")
     except Exception as e:
         logging.error(f"Erro durante a execução: {e}")
 

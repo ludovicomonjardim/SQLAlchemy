@@ -3,6 +3,11 @@ from sqlalchemy import Column, Integer, String, Date, Time, DECIMAL, ForeignKey,
 from sqlalchemy.orm import validates, Session
 from datetime import datetime, date, time
 
+from models.base import Base
+from sqlalchemy import Column, Integer, String, Date, Time, DECIMAL, ForeignKey, CheckConstraint, UniqueConstraint, event
+from sqlalchemy.orm import validates, Session
+from datetime import date, time
+
 class CinemaSession(Base):
     __tablename__ = "cinema_sessions"
 
@@ -18,10 +23,11 @@ class CinemaSession(Base):
         CheckConstraint("capacity > 0", name="check_session_capacity"),
         CheckConstraint("price >= 0", name="check_session_price"),
         CheckConstraint("LENGTH(room) > 0", name="check_session_room"),
+        UniqueConstraint("movie_id", "date", "time", "room", name="uq_cinema_session"),  # 🔹 Impede duplicação
     )
 
     def __repr__(self):
-        return f"<Cinema Session(id={self.id}, movie_id={self.movie_id}, date={self.date}, time={self.time}, room='{self.room}', capacity={self.capacity}, price={self.price})>"
+        return f"<CinemaSession(id={self.id}, movie_id={self.movie_id}, date={self.date}, time={self.time}, room='{self.room}', capacity={self.capacity}, price={self.price})>"
 
     @validates("capacity")
     def validate_capacity(self, key, value):
@@ -52,6 +58,7 @@ class CinemaSession(Base):
         if not isinstance(value, time):
             raise ValueError("Time must be a valid time object.")
         return value
+
 
 # Validação antes do commit
 @event.listens_for(Session, "before_flush")

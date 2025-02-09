@@ -28,13 +28,13 @@ class ClassificationCrud:
         self.delete()
         self.report()
 
-        self.insert_multi()
-        self.report()
-
-        self.delete_multi()
-        self.report()
-
-        self.select()
+        # self.insert_multi()
+        # self.report()
+        #
+        # self.delete_multi()
+        # self.report()
+        #
+        # self.select()
 
     def report(self):
         print(f"\nREPORT - {self.tabel_name.upper()}")
@@ -42,11 +42,14 @@ class ClassificationCrud:
 
     def insert(self):
         print(f"\nINSERT - {self.tabel_name.upper()}")
+
+        # Uma nova classificação para inserir
         new_classification = {
             "name": "PG-13",
-            "description": "Acompanhamento recomendado p/ menores de 13 anos.",  # 🔹 Ajuste para <= 50 caracteres
+            "description": "Acompanhamento recomendado p/ menores de 13 anos.",
             "min_age": 13
         }
+
         result = self.table_repo.insert(new_classification)
         if result["success"]:
             self.ids_inserted = result["data"]
