@@ -7,6 +7,7 @@ from utils.populate import populate_database
 from Avaliacao.actor_crud import ActorCrud
 from Avaliacao.director_crud import DirectorCrud
 from Avaliacao.genre_crud import GenreCrud
+from Avaliacao.classification_crud import ClassificationCrud
 
 import logging
 from utils.logging_config import setup_logger
@@ -26,9 +27,10 @@ def main():
 
         # Inicializa os CRUDs
         logging.info("Inicializando CRUDs...")
-        ActorCrud()
-        DirectorCrud()
-        GenreCrud()
+        # ActorCrud()
+        # DirectorCrud()
+        # GenreCrud()
+        ClassificationCrud()
 
         logging.info("Aplicação inicializada com sucesso!")
     except Exception as e:
