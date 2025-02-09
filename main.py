@@ -1,8 +1,9 @@
-import logging
-from utils.logging_config import setup_logger
 from database import initialize_database
 from utils.populate import populate_database
 from Avaliacao.actor_crud import ActorCrud
+
+import logging
+from utils.logging_config import setup_logger
 
 # Configura o logger
 setup_logger()

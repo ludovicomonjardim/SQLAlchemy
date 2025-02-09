@@ -1,8 +1,6 @@
 from utils.session import session_manager
 from utils.migration import atualizar_tabela
-from database import get_session
 from sqlalchemy.exc import IntegrityError, DataError, OperationalError, ProgrammingError, DatabaseError, SQLAlchemyError
-from sqlalchemy.orm import Session
 from sqlalchemy import and_, or_
 
 class CrudBaseRepository:
@@ -18,113 +16,151 @@ class CrudBaseRepository:
             print(f"Erro ao atualizar a tabela: {e}")
 
     @classmethod
-    @session_manager
+    @session_manager(commit=True)  # Dá commit, pois altera dados
     def insert(cls, data, session):
-        """Insere um novo registro no banco de dados e retorna o(s) ID(s) inserido(s) ou uma mensagem de erro."""
+        """Insere um novo registro no banco de dados e retorna um dicionário de resposta."""
         if not cls.model:
-            return "Erro: Nenhum modelo foi definido para esta operação."
+            return {"success": False, "error": "Erro: Nenhum modelo foi definido para esta operação."}
 
         try:
             if isinstance(data, list):
                 if not all(isinstance(obj, dict) for obj in data):
-                    return "Erro: Todos os itens devem ser dicionários."
+                    return {"success": False, "error": "Erro: Todos os itens devem ser dicionários."}
 
                 instances = [cls.model(**obj) for obj in data]
                 session.add_all(instances)
                 session.flush()  # Garante que os IDs sejam gerados antes do commit
-                return [instance.id for instance in instances]  # Retorna os IDs inseridos
+                return {"success": True,
+                        "data": [instance.id for instance in instances]}  # Retorna apenas a lista de IDs
 
             elif isinstance(data, dict):
                 instance = cls.model(**data)
                 session.add(instance)
                 session.flush()  # Garante que o ID seja gerado
-                return [instance.id]  # Retorna o ID inserido
+                return {"success": True, "data": instance.id}  # Retorna diretamente o ID
 
-            return "Erro: O formato de entrada não é válido."
+            return {"success": False, "error": "Erro: O formato de entrada não é válido."}
 
-        except IntegrityError as e:
+        except IntegrityError:
             session.rollback()
-            return "Erro: Violação de integridade. Registro duplicado ou dados inválidos."
+            return {"success": False, "error": "Erro: Violação de integridade. Registro duplicado ou dados inválidos."}
 
-        except Exception as e:
-            return f"Erro ao inserir: {e}"
 
     @classmethod
-    @session_manager
+    @session_manager(commit=True)  # Dá commit, pois altera dados
     def update(cls, where, with_, session):
-        """Atualiza registros com base em um critério e retorna True se bem-sucedido ou uma mensagem de erro."""
+        """Atualiza registros com base em um critério e retorna um dicionário indicando sucesso ou erro."""
         if not cls.model:
-            return "Erro: Nenhum modelo foi definido para esta operação."
+            return {"success": False, "error": "Erro: Nenhum modelo foi definido para esta operação."}
 
         if not isinstance(where, dict) or not isinstance(with_, dict):
-            return "Erro: Os critérios de atualização devem ser dicionários."
+            return {"success": False, "error": "Erro: Os critérios de atualização devem ser dicionários."}
 
         try:
             result = session.query(cls.model).filter_by(**where).update(with_, synchronize_session=False)
-
             if result == 0:
-                return "Nenhum registro encontrado para atualização."
+                return {"success": False, "error": "Nenhum registro encontrado para atualização."}
 
-            return True  # Atualização bem-sucedida
+            return {"success": True}
 
         except Exception as e:
-            return f"Erro ao atualizar: {e}"
+            return {"success": False, "error": f"Erro ao atualizar: {e}"}
 
     @classmethod
-    @session_manager
+    @session_manager(commit=True)  # Dá commit, pois altera dados
     def delete(cls, where, session, ignore_if_not_found=False):
-        """Deleta registros com base em um critério e retorna True se for bem-sucedido ou uma mensagem de erro."""
+        """Deleta um ou mais registros com base em um critério e retorna um dicionário indicando sucesso ou erro.
+
+        - Se `where` for um dicionário, exclui pelo critério de igualdade.
+        - Se `where` for uma lista de filtros, aplica `filter` com múltiplas condições.
+        """
+
         if not cls.model:
-            return "Erro: Nenhum modelo foi definido para esta operação."
+            return {"success": False, "error": "Erro: Nenhum modelo foi definido para esta operação."}
 
         try:
-            result = session.query(cls.model).filter_by(**where).delete()
+            # 🔹 Excluir um único registro se where for dicionário
+            if isinstance(where, dict):
+                query = session.query(cls.model).filter_by(**where)
+            # 🔹 Excluir múltiplos registros se where for uma lista de expressões
+            elif isinstance(where, list) and where:
+                query = session.query(cls.model).filter(*where)
+            else:
+                return {"success": False,
+                        "error": "Erro: O parâmetro 'where' deve ser um dicionário ou uma lista de filtros."}
 
-            if result == 0:
-                if not ignore_if_not_found:
-                    return "Nenhum registro encontrado para exclusão."
+            deleted_count = query.delete(synchronize_session=False)
 
-            return True  # Indica que a exclusão foi bem-sucedida
+            if deleted_count == 0 and not ignore_if_not_found:
+                return {"success": False, "error": "Nenhum registro encontrado para exclusão."}
+
+            return {"success": True, "deleted_count": deleted_count}
 
         except Exception as e:
-            return f"Erro ao excluir: {e}"
+            return {"success": False, "error": f"Erro ao excluir registros: {e}"}
+
+    # @classmethod
+    # @session_manager(commit=True)  # Dá commit, pois altera dados
+    # def delete(cls, where, session, ignore_if_not_found=False):
+    #     """Deleta registros com base em um critério e retorna um dicionário indicando sucesso ou erro."""
+    #     if not cls.model:
+    #         return {"success": False, "error": "Erro: Nenhum modelo foi definido para esta operação."}
+    #
+    #     try:
+    #         result = session.query(cls.model).filter_by(
+    #             **where).delete()  # 🔴 Limitação: `filter_by` apenas aceita igualdade exata!
+    #
+    #         if result == 0 and not ignore_if_not_found:
+    #             return {"success": False, "error": "Nenhum registro encontrado para exclusão."}
+    #
+    #         return {"success": True}
+    #
+    #     except Exception as e:
+    #         return {"success": False, "error": f"Erro ao excluir: {e}"}
+    #
+    # @classmethod
+    # @session_manager(commit=True)
+    # def delete_multi(cls, filters, session):
+    #     """Deleta múltiplos registros com base em uma lista de filtros."""
+    #     if not cls.model:
+    #         return {"success": False, "error": "Erro: Nenhum modelo foi definido para esta operação."}
+    #
+    #     if not isinstance(filters, list) or not filters:
+    #         return {"success": False, "error": "Erro: O parâmetro 'filters' deve ser uma lista não vazia."}
+    #
+    #     try:
+    #         query = session.query(cls.model).filter(*filters)  # 🔹 Usa `filter` para mais flexibilidade
+    #         deleted_count = query.delete(synchronize_session=False)
+    #
+    #         if deleted_count == 0:
+    #             return {"success": False, "error": "Nenhum registro encontrado para exclusão."}
+    #
+    #         return {"success": True, "deleted_count": deleted_count}
+    #
+    #     except Exception as e:
+    #         return {"success": False, "error": f"Erro ao excluir múltiplos registros: {e}"}
+
 
     @classmethod
-    @session_manager
-    def obtain(cls, session, where=None, fields=None, order_by=None, limit=None, offset=None, filters=None):
-        """Busca registros com opções mais flexíveis.
-
-        Parâmetros:
-        - `where` (dict): Condições de igualdade (ex.: {"name": "John"}).
-        - `fields` (list): Lista de colunas a serem retornadas (ex.: ["id", "name"]).
-        - `order_by` (list): Lista de colunas para ordenar (ex.: ["name desc"]).
-        - `limit` (int): Número máximo de registros a retornar.
-        - `offset` (int): Número de registros a pular (paginação).
-        - `filters` (list): Lista de expressões SQLAlchemy para filtros mais avançados.
-
-        Retorna:
-        - Lista de dicionários com os registros encontrados.
-        """
+    @session_manager(commit=False)  # Não dá commit, pois não altera dados
+    def select(cls, session, where=None, fields=None, order_by=None, limit=None, offset=None, filters=None):
+        """Busca registros e retorna um dicionário contendo os dados ou um erro."""
         if not cls.model:
-            return "Erro: Nenhum modelo definido."
+            return {"success": False, "error": "Erro: Nenhum modelo definido."}
 
         query = session.query(cls.model)
 
-        # Aplicar filtros simples de igualdade
         if where and isinstance(where, dict):
             query = query.filter_by(**where)
 
-        # Aplicar filtros personalizados (ex.: LIKE, >, <, IN)
         if filters and isinstance(filters, list):
-            query = query.filter(and_(*filters))  # Combina múltiplas condições com AND
+            query = query.filter(and_(*filters))
 
-        # Selecionar campos específicos
         if fields:
             valid_fields = [getattr(cls.model, field) for field in fields if hasattr(cls.model, field)]
             if valid_fields:
                 query = query.with_entities(*valid_fields)
 
-        # Aplicar ordenação
         if order_by:
             order_criteria = []
             for field in order_by:
@@ -135,14 +171,10 @@ class CrudBaseRepository:
             if order_criteria:
                 query = query.order_by(*order_criteria)
 
-        # Aplicar paginação
         if limit:
             query = query.limit(limit)
         if offset:
             query = query.offset(offset)
 
-        # Executar consulta e converter resultados para dicionário
         results = query.all()
-        return [dict(zip(fields, obj)) for obj in results] if fields else [
-            {key: value for key, value in obj.__dict__.items() if key != "_sa_instance_state"} for obj in results
-        ]
+        return {"success": True, "data": results}

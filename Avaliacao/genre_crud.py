@@ -22,7 +22,7 @@ class GenreCrud:
         self.delete()
         self.report()
 
-        self.obtain()
+        self.select()
 
     def report(self):
         print(f"\nLISTING all from table: {self.tabel_name.upper()}.")
@@ -50,10 +50,10 @@ class GenreCrud:
         message = self.table_repo.delete(where={"id": self.id_inserted})
         print(f"Resultado do delete: {message}")  # Exibe a resposta amigável
 
-    def obtain(self):
+    def select(self):
         print(f"\nQUERYING")
         print(f"Querying - for ")
-        records = self.table_repo.obtain(where=None,
+        records = self.table_repo.select(where=None,
                                         filters=[Genre.name.ilike("T%")],
                                         fields=["id", "name"],
                                         order_by=["name asc"],

@@ -1,7 +1,6 @@
-import logging
 from functools import wraps
 from database import Session
-from sqlalchemy.exc import DataError, OperationalError, ProgrammingError, DatabaseError, SQLAlchemyError
+from sqlalchemy.exc import DataError, OperationalError, ProgrammingError, DatabaseError, SQLAlchemyError, IntegrityError
 
 import logging
 from utils.logging_config import setup_logger
@@ -10,44 +9,44 @@ from utils.logging_config import setup_logger
 setup_logger()
 
 # Decorador para gerenciar sessões e tratar exceções
-def session_manager(func):
-    @wraps(func)
-    def wrapper(*args, **kwargs):
-        with Session() as session:
-            try:
-                result = func(*args, session=session, **kwargs)  # Executa a função com a sessão injetada
-                session.commit()  # Faz commit apenas se tudo der certo
-                logging.info(f"Commit realizado com sucesso na função '{func.__name__}'.")
-                return result  # Retorna o resultado esperado
+def session_manager(commit=True):  # Parâmetro para definir se deve dar commit
+    def decorator(func):
+        @wraps(func)
+        def wrapper(*args, **kwargs):
+            with Session() as session:
+                try:
+                    result = func(*args, session=session, **kwargs)  # Executa a função
 
-            except DataError as e:
-                session.rollback()
-                logging.error(f"Erro de formato de dado inválido na função '{func.__name__}': {e}", exc_info=True)
-                return "Erro: Formato de dado inválido ou valor fora do intervalo permitido."
+                    if commit:
+                        session.commit()
+                        logging.info(f"Commit realizado com sucesso na função '{func.__name__}'.")
 
-            except OperationalError as e:
-                session.rollback()
-                logging.error(f"Erro operacional: Falha na conexão com o banco de dados. '{func.__name__}': {e}", exc_info=True)
-                return "Erro operacional: Falha na conexão com o banco de dados."
+                    # 🔹 Evita aninhamento extra: se já for um dicionário com "success", retorna diretamente
+                    if isinstance(result, dict) and "success" in result:
+                        return result
 
-            except ProgrammingError as e:
-                session.rollback()
-                logging.error(f"Erro de programação: Verifique a estrutura da consulta ou do banco de dados. '{func.__name__}': {e}", exc_info=True)
-                return "Erro de programação: Verifique a estrutura da consulta ou do banco de dados."
+                    return {"success": True, "data": result}  # Apenas encapsula se necessário
 
-            except DatabaseError as e:
-                session.rollback()
-                logging.error(f"Erro grave no banco de dados. Tente novamente mais tarde. '{func.__name__}': {e}", exc_info=True)
-                return "Erro grave no banco de dados. Tente novamente mais tarde."
+                except DataError as e:
+                    session.rollback()
+                    logging.error(f"Erro de formato de dado inválido na função '{func.__name__}': {e}", exc_info=True)
+                    return {"success": False, "error": "Erro: Formato de dado inválido ou valor fora do intervalo permitido."}
 
-            except SQLAlchemyError as e:
-                session.rollback()
-                logging.error(f"Erro inesperado ao acessar o banco de dados. '{func.__name__}': {e}", exc_info=True)
-                return "Erro inesperado ao acessar o banco de dados."
+                except IntegrityError as e:
+                    session.rollback()
+                    logging.error(f"Erro de integridade: {e}", exc_info=True)
+                    return {"success": False, "error": "Erro: Violação de integridade. Registro duplicado ou dados inválidos."}
 
-            except Exception as e:
-                session.rollback()
-                logging.error(f"Erro inesperado '{func.__name__}': {e}", exc_info=True)
-                return f"Erro inesperado: {e}"
+                except OperationalError as e:
+                    session.rollback()
+                    logging.error(f"Erro operacional: {e}", exc_info=True)
+                    return {"success": False, "error": "Erro operacional: Falha na conexão com o banco de dados."}
 
-    return wrapper
+                except Exception as e:
+                    session.rollback()
+                    logging.error(f"Erro inesperado '{func.__name__}': {e}", exc_info=True)
+                    return {"success": False, "error": f"Erro inesperado: {e}"}
+
+        return wrapper
+    return decorator
+
