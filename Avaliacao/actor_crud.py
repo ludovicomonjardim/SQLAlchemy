@@ -84,6 +84,14 @@ class ActorCrud:
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
         result = self.table_repo.delete(where={"id": self.ids_inserted})
+
+
+        result = self.table_repo.delete(where={"id": 127})
+        result = self.table_repo.delete(where={"id": 128})
+        result = self.table_repo.delete(where={"id": 130})
+
+
+
         if result["success"]:
             print("Exclusão bem-sucedida.")
         else:

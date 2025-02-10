@@ -37,6 +37,7 @@ def test_update_actor(actor_repo, session):
     inserted_actor = session.query(Actor).filter_by(name="Leo").first()
 
     actor_repo.update(where={"name": "Leo"}, with_={"name": "Leonardo DiCaprio"})
+    session.expire_all()
     updated_actor = session.query(Actor).filter_by(id=inserted_actor.id).first()
     assert updated_actor.name == "Leonardo DiCaprio"
 
