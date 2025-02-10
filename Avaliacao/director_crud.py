@@ -21,19 +21,19 @@ class DirectorCrud:
         self.report()
 
         self.insert()
-        self.report()
+        # self.report()
 
         self.update()
-        self.report()
+        # self.report()
 
         self.delete()
-        self.report()
+        # self.report()
 
         self.insert_multi()
-        self.report()
+        # self.report()
 
         self.delete_multi()
-        self.report()
+        # self.report()
 
         self.select()
 
@@ -62,13 +62,10 @@ class DirectorCrud:
         ]
 
         result = self.table_repo.insert(directors_data)
-
-        print(f"\nResultado da inserção múltipla: {result}")
-
         if result["success"]:
             self.ids_inserted_multi = result["data"]
             if isinstance(self.ids_inserted_multi, list) and len(self.ids_inserted_multi) > 0:
-                print(f"IDs inseridos com sucesso: {self.ids_inserted_multi}")
+                print("IDs inseridos com sucesso!")
             else:
                 print("Nenhum registro foi inserido.")
         else:
@@ -105,17 +102,23 @@ class DirectorCrud:
         result = self.table_repo.delete(filters)
 
         if result["success"]:
-            print(f"Registros excluídos com sucesso: {result['deleted_count']}")
+            print("Registros excluídos com sucesso!")
         else:
             print(f"Erro ao excluir múltiplos registros: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
-        records = self.table_repo.select(where=None,
-                                         filters=[Director.name.ilike("T%")],
+        result = self.table_repo.select(where=None,
+                                         filters=[Director.name.ilike("C%")],
                                          fields=["id", "name"],
                                          order_by=["name asc"],
                                          limit=10)
-        print("Resultado do retrieve:")
+
+        if not result["success"]:
+            print(f"Erro ao recuperar diretores: {result['error']}")
+            return
+
+        records = result["data"]
+        print("Resultado do SELECT:")
         for record in records:
-            print(record)
+            print(f"{record.id} | {record.name}")

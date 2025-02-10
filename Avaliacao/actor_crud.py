@@ -17,19 +17,19 @@ class ActorCrud:
         self.report()
 
         self.insert()
-        self.report()
+        # self.report()
 
         self.update()
-        self.report()
+        # self.report()
 
         self.delete()
-        self.report()
+        # self.report()
 
         self.insert_multi()
-        self.report()
+        # self.report()
 
         self.delete_multi()
-        self.report()
+        # self.report()
 
         self.select()
 
@@ -61,15 +61,12 @@ class ActorCrud:
 
         # Chamando a função de inserção múltipla
         result = self.table_repo.insert(actors_data)
-
-        print(f"\nResultado da inserção múltipla: {result}")
-
         # Exibindo o resultado
         if result["success"]:
             self.ids_inserted_multi = result["data"]
 
             if isinstance(self.ids_inserted_multi, list) and len(self.ids_inserted_multi) > 0:
-                print(f"IDs inseridos com sucesso: {self.ids_inserted_multi}")
+                print("IDs inseridos com sucesso!")
             else:
                 print(f"Nenhum registro foi inserido.")
         else:
@@ -87,12 +84,6 @@ class ActorCrud:
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
         result = self.table_repo.delete(where={"id": self.ids_inserted})
-
-        # result = self.table_repo.delete(where={"id": 139})
-        # result = self.table_repo.delete(where={"id": 140})
-        # result = self.table_repo.delete(where={"id": 141})
-        # result = self.table_repo.delete(where={"id": 142})
-
         if result["success"]:
             print("Exclusão bem-sucedida.")
         else:
@@ -110,20 +101,24 @@ class ActorCrud:
 
         # Chamando a função de exclusão múltipla
         result = self.table_repo.delete(filters)
-
         if result["success"]:
-            print(f"Registros excluídos com sucesso: {result['deleted_count']}")
+            print("Registros excluídos com sucesso!")
         else:
             print(f"Erro ao excluir múltiplos registros: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
 
-        records = self.table_repo.select(where=None,
+        result = self.table_repo.select(where=None,
                                         filters=[Actor.name.ilike("T%")],
                                         fields=["id", "name"],
                                         order_by=["name asc"],
                                         limit=10)
-        print(f"Resultado do retrieve:")
+        if not result["success"]:
+            print(f"Erro ao recuperar atores: {result['error']}")
+            return
+
+        records = result["data"]
+        print("Resultado do SELECT:")
         for record in records:
-            print(record)
+            print(f"{record.id} | {record.name}")

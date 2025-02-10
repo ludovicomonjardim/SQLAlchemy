@@ -7,7 +7,6 @@ from repositories.crud_base_repository import CrudBaseRepository
 from models.ticket import Ticket
 from models.cinema_session import CinemaSession
 from utils.session import session_manager
-from datetime import datetime, UTC
 
 
 class TicketRepository(CrudBaseRepository):
@@ -48,11 +47,25 @@ class TicketRepository(CrudBaseRepository):
     @session_manager(commit=True)  # Dá commit, pois altera dados
     def insert(self, data, session):
         """
-        Insere um novo ingresso no banco de dados.
-        - Verifica se a sessão de cinema associada existe antes de inserir.
+        Insere um ou mais ingressos no banco de dados.
+        - Se `data` for uma lista, verifica se todas as sessões de cinema existem antes de inserir.
         """
-        session_exists = session.query(CinemaSession).filter_by(id=data["cinema_session_id"]).first()
-        if not session_exists:
-            return {"success": False, "error": f"Erro: A sessão de cinema ID {data['cinema_session_id']} não existe."}
+
+        if isinstance(data, list):  # 🔹 Se for uma lista, verifica todas as sessões antes de inserir
+            session_ids = [ticket["cinema_session_id"] for ticket in data]
+            existing_sessions = {s.id for s in
+                                 session.query(CinemaSession).filter(CinemaSession.id.in_(session_ids)).all()}
+
+            for ticket in data:
+                if ticket["cinema_session_id"] not in existing_sessions:
+                    return {"success": False,
+                            "error": f"Erro: A sessão de cinema ID {ticket['cinema_session_id']} não existe."}
+
+        elif isinstance(data, dict):  # 🔹 Se for um único ingresso, verifica a sessão correspondente
+            session_exists = session.query(CinemaSession).filter_by(id=data["cinema_session_id"]).first()
+            if not session_exists:
+                return {"success": False,
+                        "error": f"Erro: A sessão de cinema ID {data['cinema_session_id']} não existe."}
 
         return super().insert(data)
+

@@ -1,5 +1,5 @@
 from models.base import Base
-from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, CheckConstraint, event
+from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, CheckConstraint, UniqueConstraint, event
 from sqlalchemy.orm import validates, relationship, Session
 
 class Movie(Base):
@@ -21,6 +21,7 @@ class Movie(Base):
         CheckConstraint("year BETWEEN 1888 AND 2100", name="check_movie_year"),
         CheckConstraint("duration IS NULL OR duration > 0", name="check_movie_duration"),
         CheckConstraint("rating IS NULL OR (rating BETWEEN 0 AND 10)", name="check_movie_rating"),
+        UniqueConstraint("title", "year", "duration", name="uq_movie_title_year_duration"),
     )
 
     def __repr__(self):

@@ -28,19 +28,19 @@ class CinemaSessionCrud:
         self.report()
 
         self.insert()
-        self.report()
+        # self.report()
 
         self.update()
-        self.report()
+        # self.report()
 
         self.delete()
-        self.report()
+        # self.report()
 
         self.insert_multi()
-        self.report()
+        # self.report()
 
         self.delete_multi()
-        self.report()
+        # self.report()
 
         self.select()
 
@@ -53,9 +53,9 @@ class CinemaSessionCrud:
 
         # Nova seção de cinema a ser inserida
         new_movie_session = {
-            "movie_id": 4,
+            "movie_id": 126,
             "date": date.today(),
-            "time": time(19, 30),
+            "time": time(21, 30),
             "room": "Sala 1",
             "capacity": 100,
             "price": 25.00
@@ -74,18 +74,15 @@ class CinemaSessionCrud:
 
         # Lista de sessões para inserir
         sessions_data = [
-            {"movie_id": 2, "date": date.today(), "time": time(18, 00), "room": "Sala 2", "capacity": 80, "price": 22.00},
-            {"movie_id": 3, "date": date.today(), "time": time(20, 00), "room": "Sala 3", "capacity": 120, "price": 30.00},
-            {"movie_id": 4, "date": date.today(), "time": time(21, 30), "room": "Sala 1", "capacity": 100, "price": 28.00},
+            {"movie_id": 126, "date": date.today(), "time": time(18, 00), "room": "Sala 2", "capacity": 80, "price": 22.00},
+            {"movie_id": 126, "date": date.today(), "time": time(20, 00), "room": "Sala 3", "capacity": 120, "price": 30.00},
+            {"movie_id": 125, "date": date.today(), "time": time(21, 30), "room": "Sala 1", "capacity": 100, "price": 28.00},
         ]
 
         result = self.table_repo.insert(sessions_data)
-
-        print(f"\nResultado da inserção múltipla: {result}")
-
         if result["success"]:
             self.ids_inserted_multi = result["data"]
-            print(f"IDs inseridos com sucesso: {self.ids_inserted_multi}")
+            print(f"IDs inseridos com sucesso!")
         else:
             print(f"Erro na inserção múltipla: {result['error']}")
 
@@ -126,17 +123,24 @@ class CinemaSessionCrud:
         result = self.table_repo.delete(filters)
 
         if result["success"]:
-            print(f"Registros excluídos com sucesso: {result['deleted_count']}")
+            print("Registros excluídos com sucesso!")
         else:
             print(f"Erro ao excluir múltiplos registros: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
-        records = self.table_repo.select(where=None,
+        result = self.table_repo.select(where=None,
                                          filters=[CinemaSession.room.ilike("Sala%")],
                                          fields=["id", "date", "time", "room", "capacity", "price"],
                                          order_by=["date asc"],
                                          limit=10)
-        print("Resultado do retrieve:")
+
+        if not result["success"]:
+            print(f"Erro ao recuperar seçoes de cinema: {result['error']}")
+            return
+
+        records = result["data"]
+
+        print("Resultado do SELECT:")
         for record in records:
-            print(record)
+            print(f"{record.id} | {record.date} | {record.time} | {record.room} | {record.capacity} | {record.price}")
