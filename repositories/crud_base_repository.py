@@ -66,7 +66,6 @@ class CrudBaseRepository:
             session.rollback()
             return {"success": False, "error": "Erro: Violação de integridade. Registro duplicado ou dados inválidos."}
 
-
     @classmethod
     @session_manager(commit=True)  # Dá commit, pois altera dados
     def update(cls, where, with_, session):
@@ -77,26 +76,56 @@ class CrudBaseRepository:
         - Retorna um dicionário indicando sucesso ou erro.
         """
 
-        # Verifica se o modelo foi definido.
         if not cls.model:
             return {"success": False, "error": "Erro: Nenhum modelo foi definido para esta operação."}
 
-        # Valida os tipos de entrada.
         if not isinstance(where, dict) or not isinstance(with_, dict):
             return {"success": False, "error": "Erro: Os critérios de atualização devem ser dicionários."}
 
         try:
-            # Atualiza os registros.
             result = session.query(cls.model).filter_by(**where).update(with_, synchronize_session=False)
-            # Verifica se algum registro foi encontrado.
-            if result == 0:
-                return {"success": False, "error": "Nenhum registro encontrado para atualização."}
 
-            # Indica sucesso na operação
+            if result == 0:
+                return {"success": False,
+                        "error": "Nenhum registro encontrado para atualização."}  # 🔹 Retorna erro se nenhum registro for atualizado
+
             return {"success": True}
 
         except Exception as e:
+            session.rollback()
             return {"success": False, "error": f"Erro ao atualizar: {e}"}
+
+
+    # @classmethod
+    # @session_manager(commit=True)  # Dá commit, pois altera dados
+    # def update(cls, where, with_, session):
+    #     """
+    #     Atualiza registros no banco de dados com base em um critério.
+    #     - `where` define os critérios de seleção dos registros.
+    #     - `with_` define os novos valores para os campos.
+    #     - Retorna um dicionário indicando sucesso ou erro.
+    #     """
+    #
+    #     # Verifica se o modelo foi definido.
+    #     if not cls.model:
+    #         return {"success": False, "error": "Erro: Nenhum modelo foi definido para esta operação."}
+    #
+    #     # Valida os tipos de entrada.
+    #     if not isinstance(where, dict) or not isinstance(with_, dict):
+    #         return {"success": False, "error": "Erro: Os critérios de atualização devem ser dicionários."}
+    #
+    #     try:
+    #         # Atualiza os registros.
+    #         result = session.query(cls.model).filter_by(**where).update(with_, synchronize_session=False)
+    #         # Verifica se algum registro foi encontrado.
+    #         if result == 0:
+    #             return {"success": False, "error": "Nenhum registro encontrado para atualização."}
+    #
+    #         # Indica sucesso na operação
+    #         return {"success": True}
+    #
+    #     except Exception as e:
+    #         return {"success": False, "error": f"Erro ao atualizar: {e}"}
 
     @classmethod
     @session_manager(commit=True)  # Dá commit, pois altera dados

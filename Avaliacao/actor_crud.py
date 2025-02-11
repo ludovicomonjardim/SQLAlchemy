@@ -31,6 +31,8 @@ class ActorCrud:
         self.delete_multi()
         # self.report()
 
+        self.insert_dupli()
+
         self.select()
 
     def report(self):
@@ -47,6 +49,26 @@ class ActorCrud:
             print(f"\nO nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
         else:
             logging.error(result["error"])
+
+    def insert_dupli(self):
+        print(f"\nINSERT DUPLI - {self.tabel_name.upper()}")
+
+        new_name = names.get_full_name()
+
+        # Primeira vez
+        self.table_repo.insert({"name": new_name})
+
+        # Segunda vez
+        result = self.table_repo.insert({"name": new_name})
+
+        print(f"result em INSER DUPLI: {result}")
+
+        if result["success"]:
+            self.ids_inserted = result["data"]  # Agora receberá diretamente o ID
+            print(f"\nO nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
+        else:
+            logging.error(result["error"])
+            print(result["error"])
 
     def insert_multi(self):
         print(f"\nINSERT MULTI - {self.tabel_name.upper()}")
@@ -84,14 +106,6 @@ class ActorCrud:
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
         result = self.table_repo.delete(where={"id": self.ids_inserted})
-
-
-        result = self.table_repo.delete(where={"id": 127})
-        result = self.table_repo.delete(where={"id": 128})
-        result = self.table_repo.delete(where={"id": 130})
-
-
-
         if result["success"]:
             print("Exclusão bem-sucedida.")
         else:
