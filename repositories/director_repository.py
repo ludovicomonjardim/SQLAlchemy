@@ -4,7 +4,6 @@ Este módulo contém a classe DirectorRepository, responsável por interagir com
 """
 
 from repositories.crud_base_repository import CrudBaseRepository
-from repositories.movie_director_repository import MovieDirectorRepository
 from models.director import Director
 from utils.session import session_manager
 

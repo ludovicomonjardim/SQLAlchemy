@@ -7,7 +7,6 @@ from repositories.crud_base_repository import CrudBaseRepository
 from models.cinema_session import CinemaSession
 from models.movie import Movie
 from utils.session import session_manager
-# from datetime import date, time
 
 
 class CinemaSessionRepository(CrudBaseRepository):

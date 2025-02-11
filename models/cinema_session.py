@@ -1,8 +1,3 @@
-# from models.base import Base
-# from sqlalchemy import Column, Integer, String, Date, Time, DECIMAL, ForeignKey, CheckConstraint, event
-# from sqlalchemy.orm import validates, Session
-# from datetime import datetime, date, time
-
 from models.base import Base
 from sqlalchemy import Column, Integer, String, Date, Time, Float, ForeignKey, CheckConstraint, UniqueConstraint, event
 from sqlalchemy.orm import validates, Session

@@ -1,7 +1,6 @@
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
-from models.base import Base
 
 # IMPORTANDO TODOS OS MODELOS AQUI PARA EVITAR ERRO DE REFERÊNCIA
 from models.actor import Actor
@@ -21,7 +20,6 @@ from utils.logging_config import setup_logger
 
 # Configura o logger
 setup_logger()
-
 
 
 # Configuração do banco de dados

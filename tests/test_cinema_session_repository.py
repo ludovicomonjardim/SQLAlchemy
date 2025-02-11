@@ -1,5 +1,4 @@
 import pytest
-from sqlalchemy.exc import IntegrityError
 from repositories.cinema_session_repository import CinemaSessionRepository
 from models.cinema_session import CinemaSession
 from models.movie import Movie

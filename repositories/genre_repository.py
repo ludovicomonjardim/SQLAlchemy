@@ -4,7 +4,6 @@ Este módulo contém a classe GenreRepository, responsável por interagir com a 
 """
 
 from repositories.crud_base_repository import CrudBaseRepository
-from repositories.movie_genre_repository import MovieGenreRepository
 from models.genre import Genre
 from utils.session import session_manager
 

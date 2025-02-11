@@ -4,8 +4,8 @@ Este módulo contém a classe CrudBaseRepository, responsável por operações g
 """
 from utils.session import session_manager
 from utils.migration import atualizar_tabela
-from sqlalchemy.exc import IntegrityError, DataError, OperationalError, ProgrammingError, DatabaseError, SQLAlchemyError
-from sqlalchemy import and_, or_
+from sqlalchemy.exc import IntegrityError
+from sqlalchemy import and_
 
 class CrudBaseRepository:
     """
