@@ -1,12 +1,13 @@
-from models.base import Base
-from sqlalchemy import Column, Integer, String, Date, Time, DECIMAL, ForeignKey, CheckConstraint, event
-from sqlalchemy.orm import validates, Session
-from datetime import datetime, date, time
+# from models.base import Base
+# from sqlalchemy import Column, Integer, String, Date, Time, DECIMAL, ForeignKey, CheckConstraint, event
+# from sqlalchemy.orm import validates, Session
+# from datetime import datetime, date, time
 
 from models.base import Base
-from sqlalchemy import Column, Integer, String, Date, Time, DECIMAL, ForeignKey, CheckConstraint, UniqueConstraint, event
+from sqlalchemy import Column, Integer, String, Date, Time, Float, ForeignKey, CheckConstraint, UniqueConstraint, event
 from sqlalchemy.orm import validates, Session
 from datetime import date, time
+from sqlalchemy.orm import relationship
 
 class CinemaSession(Base):
     __tablename__ = "cinema_sessions"
@@ -15,9 +16,11 @@ class CinemaSession(Base):
     movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
     date = Column(Date, nullable=False)
     time = Column(Time, nullable=False)
-    room = Column(String(10), nullable=False)
+    room = Column(String(50), nullable=False)
     capacity = Column(Integer, nullable=False)
-    price = Column(DECIMAL(6, 2), nullable=False)
+    price = Column(Float, nullable=False)
+
+    movie = relationship("Movie")
 
     __table_args__ = (
         CheckConstraint("capacity > 0", name="check_session_capacity"),

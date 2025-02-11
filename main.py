@@ -5,12 +5,12 @@ Este módulo é o ponto de entrada da aplicação.
 from database import initialize_database
 from utils.populate import populate_database
 from Avaliacao.actor_crud import ActorCrud
-# from Avaliacao.director_crud import DirectorCrud
-# from Avaliacao.genre_crud import GenreCrud
-# from Avaliacao.classification_crud import ClassificationCrud
-# from Avaliacao.cinema_session_crud import CinemaSessionCrud
-# from Avaliacao.ticket_crud import TicketCrud
-# from Avaliacao.movie_crud import MovieCrud
+from Avaliacao.director_crud import DirectorCrud
+from Avaliacao.genre_crud import GenreCrud
+from Avaliacao.classification_crud import ClassificationCrud
+from Avaliacao.cinema_session_crud import CinemaSessionCrud
+from Avaliacao.ticket_crud import TicketCrud
+from Avaliacao.movie_crud import MovieCrud
 
 
 import logging
@@ -31,11 +31,11 @@ def main():
 
         # Inicializa os CRUDs
         logging.info("Inicializando CRUDs...")
-        ActorCrud()
+        # ActorCrud()
         # DirectorCrud()
         # GenreCrud()
         # ClassificationCrud()
-        # CinemaSessionCrud()
+        CinemaSessionCrud()
         # TicketCrud()
         # MovieCrud()
 
