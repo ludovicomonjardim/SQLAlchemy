@@ -18,7 +18,7 @@ class Director(Base):
     @validates("name")
     def validate_name(self, key, value):
         if not isinstance(value, str) or not value.strip() or len(value) > 100:
-            raise ValueError("Director name must be a non-empty string with a maximum of 100 characters.")
+            raise ValueError("Director name must be a non-empty string with a mamum of 100 characters.")
         return value.strip()  # Remove espaços extras
 
 # Validação antes do commit

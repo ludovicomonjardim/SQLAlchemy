@@ -71,6 +71,10 @@ def test_insert_ticket_invalid_session(ticket_repo, session):
 def test_insert_multi_ticket(ticket_repo, session, cinema_session):
     """Testa a inserção múltipla de ingressos."""
 
+    # 🔹 Garante que a sessão de cinema não tem ingressos antes do teste
+    session.query(Ticket).filter_by(cinema_session_id=cinema_session.id).delete(synchronize_session=False)
+    session.commit()
+
     tickets_data = [
         {"cinema_session_id": cinema_session.id, "customer": "Alice Johnson"},
         {"cinema_session_id": cinema_session.id, "customer": "Bob Smith"},
@@ -82,7 +86,8 @@ def test_insert_multi_ticket(ticket_repo, session, cinema_session):
     assert result["success"] is True, f"Falha na inserção múltipla: {result['error']}"
 
     inserted_tickets = session.query(Ticket).filter(Ticket.cinema_session_id == cinema_session.id).all()
-    assert len(inserted_tickets) == 3
+    assert len(inserted_tickets) == 3, f"Esperado 3 ingressos, mas encontrou {len(inserted_tickets)}"
+
 
 
 def test_delete_ticket(ticket_repo, session, cinema_session):
