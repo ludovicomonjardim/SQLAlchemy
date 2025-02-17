@@ -35,7 +35,7 @@ class TicketCrud:
         print(f"\nINSERT - {self.tabel_name.upper()}")
 
         new_ticket = {
-            "cinema_session_id": 14,  # ID de uma sessão existente no banco
+            "cinema_session_id": 1,  # ID de uma sessão existente no banco
             "customer": "John Doe",
             "purchase_date": datetime.now(UTC)
         }
@@ -53,9 +53,9 @@ class TicketCrud:
 
         # Lista de ingressos para inserir
         tickets_data = [
-            {"cinema_session_id": 14, "customer": "Alice Johnson", "purchase_date": datetime.now(UTC)},
-            {"cinema_session_id": 15, "customer": "Bob Smith", "purchase_date": datetime.now(UTC)},
-            {"cinema_session_id": 16, "customer": "Charlie Brown", "purchase_date": datetime.now(UTC)},
+            {"cinema_session_id": 1, "customer": "Alice Johnson", "purchase_date": datetime.now(UTC)},
+            {"cinema_session_id": 2, "customer": "Bob Smith", "purchase_date": datetime.now(UTC)},
+            {"cinema_session_id": 3, "customer": "Charlie Brown", "purchase_date": datetime.now(UTC)},
         ]
 
         result = self.table_repo.insert(tickets_data)
