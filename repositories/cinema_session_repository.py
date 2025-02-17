@@ -4,6 +4,7 @@ Este módulo contém a classe CinemaSessionRepository, responsável por interagi
 """
 
 from repositories.crud_base_repository import CrudBaseRepository
+from repositories.ticket_repository import TicketRepository
 from models.cinema_session import CinemaSession
 from models.movie import Movie
 from utils.session import session_manager
@@ -54,65 +55,12 @@ class CinemaSessionRepository(CrudBaseRepository):
     @session_manager(commit=True)  # Dá commit, pois altera dados
     def delete(self, where, session):
         """
-        Exclui uma ou mais sessões de cinema apenas se não houver ingressos associados.
-        - `where` pode ser um dicionário (exclusão única) ou uma lista de filtros (exclusão múltipla).
-        - Retorna um dicionário indicando sucesso ou falha da operação.
+        Exclui um ou mais diretores e suas associações com filmes.
+        - Remove todas as dependências antes de excluir o diretor.
+        - Usa `delete_with_dependencies()` para garantir exclusão segura.
         """
-        if not where:
-            return {"success": False, "error": "Erro: Nenhum critério de exclusão fornecido."}
 
-        try:
-            from models.ticket import Ticket
-
-            if isinstance(where, dict):
-                # 🔹 Excluir um único registro se where for um dicionário
-                session_to_delete = session.query(CinemaSession).filter_by(**where).first()
-                if not session_to_delete:
-                    return {"success": False, "error": "Erro: Sessão de cinema não encontrada."}
-
-                # Verifica se há ingressos associados à sessão
-                associated_tickets = session.query(Ticket).filter(
-                    Ticket.cinema_session_id == session_to_delete.id).count()
-                if associated_tickets > 0:
-                    return {
-                        "success": False,
-                        "error": f"Erro: Não é possível excluir a sessão {session_to_delete.id}, pois possui {associated_tickets} ingresso(s) vendidos."
-                    }
-
-                # Prossegue com a exclusão
-                result = super().delete(where)
-                if not result["success"]:
-                    return result
-
-                return {"success": True, "message": f"Sessão {session_to_delete.id} removida com sucesso."}
-
-            elif isinstance(where, list):
-                # 🔹 Excluir múltiplos registros se where for uma lista de expressões
-                sessions_to_delete = session.query(CinemaSession).filter(*where).all()
-                if not sessions_to_delete:
-                    return {"success": False, "error": "Erro: Nenhuma sessão encontrada para exclusão."}
-
-                for session_obj in sessions_to_delete:
-                    associated_tickets = session.query(Ticket).filter(
-                        Ticket.cinema_session_id == session_obj.id).count()
-                    if associated_tickets > 0:
-                        return {
-                            "success": False,
-                            "error": f"Erro: Não é possível excluir a sessão {session_obj.id}, pois possui {associated_tickets} ingresso(s) vendidos."
-                        }
-
-                deleted_count = session.query(CinemaSession).filter(*where).delete(synchronize_session=False)
-
-                if deleted_count == 0:
-                    return {"success": False, "error": "Nenhuma sessão encontrada para exclusão."}
-
-                return {"success": True, "deleted_count": deleted_count}
-
-            else:
-                return {"success": False,
-                        "error": "Erro: O parâmetro `where` deve ser um dicionário ou uma lista de filtros."}
-
-        except Exception as e:
-            return {"success": False, "error": f"Erro ao excluir sessão de cinema: {e}"}
-
-
+        return super().delete_with_dependencies(
+            where=where,
+            related_models=[(TicketRepository.model, "cinema_session_id")]
+        )

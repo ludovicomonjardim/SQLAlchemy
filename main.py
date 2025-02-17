@@ -27,16 +27,17 @@ def main():
 
         # Popula o banco de dados com dados iniciais
         # logging.info("Populando banco de dados...")
-        # populate_database()
+        populate_database()
+
 
         # Inicializa os CRUDs
-        logging.info("Inicializando CRUDs...")
+        # logging.info("Inicializando CRUDs...")
         # ActorCrud()
         # DirectorCrud()
         # GenreCrud()
-        ClassificationCrud()
+        # ClassificationCrud()
         # CinemaSessionCrud()
-        # TicketCrud()
+        TicketCrud()
         # MovieCrud()
 
         logging.info("Fim dos Cruds.")

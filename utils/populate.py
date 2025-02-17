@@ -11,7 +11,7 @@ from models.movie_genre import MovieGenre
 from models.cinema_session import CinemaSession
 from models.ticket import Ticket
 
-@session_manager
+@session_manager(commit=True)
 def populate_database(session):
     """
     Popula o banco de dados com classificações, gêneros, diretores, atores,
@@ -87,21 +87,30 @@ def populate_database(session):
 
         # Criando sessões de cinema
         cinema_sessions = [
-            CinemaSession(movie_id=movies_dict["Inception"], date=date(2025, 1, 10), time=time(19, 30), room="Sala 1", capacity=100, price=25.00),
-            CinemaSession(movie_id=movies_dict["Pulp Fiction"], date=date(2025, 1, 11), time=time(20, 00), room="Sala 2", capacity=80, price=22.50),
-            CinemaSession(movie_id=movies_dict["O Resgate do Soldado Ryan"], date=date(2025, 1, 12), time=time(21, 00), room="Sala 3", capacity=120, price=27.00),
+            CinemaSession(movie_id=movies_dict["Inception"], date=date(2025, 1, 10), time=time(19, 30), room="Sala 1",
+                          capacity=100, price=25.00),
+            CinemaSession(movie_id=movies_dict["Pulp Fiction"], date=date(2025, 1, 11), time=time(20, 00),
+                          room="Sala 2", capacity=80, price=22.50),
+            CinemaSession(movie_id=movies_dict["O Resgate do Soldado Ryan"], date=date(2025, 1, 12), time=time(21, 00),
+                          room="Sala 3", capacity=120, price=27.00),
         ]
         session.bulk_save_objects(cinema_sessions)
-        session.commit()  # Confirma as inserções
+        session.commit()  # ✅ Garante que os IDs foram gerados
 
-        # Criando ingressos
+        # Buscando os IDs reais das sessões
+        sessions_dict = {s.room: s.id for s in session.query(CinemaSession).all()}
+
+        # Criando ingressos com IDs corretos
         tickets = [
-            Ticket(cinema_session_id=1, customer="João da Silva", purchase_date=datetime(2025, 1, 5, 15, 0, tzinfo=timezone.utc)),
-            Ticket(cinema_session_id=2, customer="Maria Oliveira", purchase_date=datetime(2025, 1, 6, 18, 30, tzinfo=timezone.utc)),
-            Ticket(cinema_session_id=3, customer="Carlos Souza", purchase_date=datetime(2025, 1, 7, 20, 45, tzinfo=timezone.utc)),
+            Ticket(cinema_session_id=sessions_dict["Sala 1"], customer="João da Silva",
+                   purchase_date=datetime(2025, 1, 5, 15, 0, tzinfo=timezone.utc)),
+            Ticket(cinema_session_id=sessions_dict["Sala 2"], customer="Maria Oliveira",
+                   purchase_date=datetime(2025, 1, 6, 18, 30, tzinfo=timezone.utc)),
+            Ticket(cinema_session_id=sessions_dict["Sala 3"], customer="Carlos Souza",
+                   purchase_date=datetime(2025, 1, 7, 20, 45, tzinfo=timezone.utc)),
         ]
         session.bulk_save_objects(tickets)
-        session.commit()
+        session.commit()  # ✅ Agora os ingressos referenciam IDs válidos
 
         print("✅ Banco de dados populado com sucesso!")
 

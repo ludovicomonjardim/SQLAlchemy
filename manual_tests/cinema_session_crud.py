@@ -14,14 +14,7 @@ class CinemaSessionCrud:
         self.table_repo = CinemaSessionRepository()
 
         self.tabel_name = "cinema_session"
-        self.default_data = {
-            "movie_id": 1,  # 🔹 ID de um filme existente no banco
-            "date": date.today(),
-            "time": time(19, 30),
-            "room": "Sala 1",
-            "capacity": 100,
-            "price": 25.00
-        }
+
         self.ids_inserted = None
         self.ids_inserted_multi = None
 
@@ -53,7 +46,7 @@ class CinemaSessionCrud:
 
         # Nova seção de cinema a ser inserida
         new_movie_session = {
-            "movie_id": 126,
+            "movie_id": 1,
             "date": date.today(),
             "time": time(21, 30),
             "room": "Sala 1",
@@ -74,9 +67,9 @@ class CinemaSessionCrud:
 
         # Lista de sessões para inserir
         sessions_data = [
-            {"movie_id": 126, "date": date.today(), "time": time(18, 00), "room": "Sala 2", "capacity": 80, "price": 22.00},
-            {"movie_id": 126, "date": date.today(), "time": time(20, 00), "room": "Sala 3", "capacity": 120, "price": 30.00},
-            {"movie_id": 125, "date": date.today(), "time": time(21, 30), "room": "Sala 1", "capacity": 100, "price": 28.00},
+            {"movie_id": 1, "date": date.today(), "time": time(18, 00), "room": "Sala 2", "capacity": 80, "price": 22.00},
+            {"movie_id": 2, "date": date.today(), "time": time(20, 00), "room": "Sala 3", "capacity": 120, "price": 30.00},
+            {"movie_id": 3, "date": date.today(), "time": time(21, 30), "room": "Sala 1", "capacity": 100, "price": 28.00},
         ]
 
         result = self.table_repo.insert(sessions_data)
