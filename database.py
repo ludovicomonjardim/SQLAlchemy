@@ -21,15 +21,23 @@ from utils.logging_config import setup_logger
 # Configura o logger
 setup_logger()
 
+# Verifica se está rodando dentro do Docker
+DOCKER_ENV = os.getenv("DOCKER_ENV", "false").lower() == "true"
 
-# Configuração do banco de dados
-if os.getenv("DOCKER_ENV") == "true":
-    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@db:5432/cinema")
-else:
-    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
+# Define a URL do banco
+DATABASE_URL = os.getenv("DATABASE_URL")
+
+# Fallback para desenvolvimento
+if not DATABASE_URL:
+    if DOCKER_ENV:
+        DATABASE_URL = "postgresql+psycopg2://postgres:admin@db:5432/cinema"
+    else:
+        DATABASE_URL = "postgresql+psycopg2://postgres:admin@localhost:5432/cinema"
+
+if not DATABASE_URL and not DOCKER_ENV:
+    raise RuntimeError("DATABASE_URL não definida e não estamos rodando no Docker.")
 
 logging.info(f"Using database URL: {DATABASE_URL}")
-
 
 # Criando a engine
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=False)

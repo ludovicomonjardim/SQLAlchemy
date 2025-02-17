@@ -4,6 +4,7 @@ Este módulo contém a classe GenreRepository, responsável por interagir com a 
 """
 
 from repositories.crud_base_repository import CrudBaseRepository
+from repositories.movie_genre_repository import MovieGenreRepository
 from models.genre import Genre
 from utils.session import session_manager
 
@@ -34,52 +35,67 @@ class GenreRepository(CrudBaseRepository):
                 print(f"{genre.id:<5} {genre.name:<45}")
         else:
             print("Nenhum gênero encontrado na tabela.")
-
+            
     @session_manager(commit=True)  # Dá commit, pois altera dados
     def delete(self, where, session):
         """
-        Exclui um ou mais gêneros e suas associações com filmes.
-        - `where` pode ser um dicionário (exclusão única) ou uma lista de filtros (exclusão múltipla).
-        - Remove as associações antes de excluir o gênero.
-        - Retorna um dicionário indicando sucesso ou falha da operação.
+        Exclui um ou mais diretores e suas associações com filmes.
+        - Remove todas as dependências antes de excluir o diretor.
+        - Usa `delete_with_dependencies()` para garantir exclusão segura.
         """
 
-        if not where:
-            return {"success": False, "error": "Erro: Nenhum critério de exclusão fornecido."}
+        return super().delete_with_dependencies(
+            where=where,
+            related_models=[(MovieGenreRepository.model, "genre_id")]
+        )
 
-        try:
-            # Se `where` for um dicionário, usa `filter_by`
-            if isinstance(where, dict):
-                genre_to_delete = session.query(Genre).filter_by(**where).first()
-                if not genre_to_delete:
-                    return {"success": False, "error": "Erro: Gênero não encontrado."}
 
-                # Exclui associações do gênero antes de removê-lo
-                from repositories.movie_genre_repository import MovieGenreRepository
-                movie_genre_repo = MovieGenreRepository()
-                result_associations = movie_genre_repo.delete({"id": genre_to_delete.id}, ignore_if_not_found=True)
-                if not result_associations["success"]:
-                    return result_associations
-
-                result = super().delete(where)
-                if not result["success"]:
-                    return result
-
-                return {"success": True, "message": f"Gênero '{genre_to_delete.name}' removido com sucesso."}
-
-            # Se `where` for uma lista, usa `filter`
-            elif isinstance(where, list):
-                query = session.query(Genre).filter(*where)
-                deleted_count = query.delete(synchronize_session=False)
-
-                if deleted_count == 0:
-                    return {"success": False, "error": "Nenhum gênero encontrado para exclusão."}
-
-                return {"success": True, "deleted_count": deleted_count}
-
-            else:
-                return {"success": False,
-                        "error": "Erro: O parâmetro `where` deve ser um dicionário ou uma lista de filtros."}
-
-        except Exception as e:
-            return {"success": False, "error": f"Erro ao excluir registros: {e}"}
+    # 
+    # @session_manager(commit=True)  # Dá commit, pois altera dados
+    # def delete(self, where, session):
+    #     """
+    #     Exclui um ou mais gêneros e suas associações com filmes.
+    #     - `where` pode ser um dicionário (exclusão única) ou uma lista de filtros (exclusão múltipla).
+    #     - Remove as associações antes de excluir o gênero.
+    #     - Retorna um dicionário indicando sucesso ou falha da operação.
+    #     """
+    # 
+    #     if not where:
+    #         return {"success": False, "error": "Erro: Nenhum critério de exclusão fornecido."}
+    # 
+    #     try:
+    #         # Se `where` for um dicionário, usa `filter_by`
+    #         if isinstance(where, dict):
+    #             genre_to_delete = session.query(Genre).filter_by(**where).first()
+    #             if not genre_to_delete:
+    #                 return {"success": False, "error": "Erro: Gênero não encontrado."}
+    # 
+    #             # Exclui associações do gênero antes de removê-lo
+    #             from repositories.movie_genre_repository import MovieGenreRepository
+    #             movie_genre_repo = MovieGenreRepository()
+    #             result_associations = movie_genre_repo.delete({"id": genre_to_delete.id}, ignore_if_not_found=True)
+    #             if not result_associations["success"]:
+    #                 return result_associations
+    # 
+    #             result = super().delete(where)
+    #             if not result["success"]:
+    #                 return result
+    # 
+    #             return {"success": True, "message": f"Gênero '{genre_to_delete.name}' removido com sucesso."}
+    # 
+    #         # Se `where` for uma lista, usa `filter`
+    #         elif isinstance(where, list):
+    #             query = session.query(Genre).filter(*where)
+    #             deleted_count = query.delete(synchronize_session=False)
+    # 
+    #             if deleted_count == 0:
+    #                 return {"success": False, "error": "Nenhum gênero encontrado para exclusão."}
+    # 
+    #             return {"success": True, "deleted_count": deleted_count}
+    # 
+    #         else:
+    #             return {"success": False,
+    #                     "error": "Erro: O parâmetro `where` deve ser um dicionário ou uma lista de filtros."}
+    # 
+    #     except Exception as e:
+    #         return {"success": False, "error": f"Erro ao excluir registros: {e}"}

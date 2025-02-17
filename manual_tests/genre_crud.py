@@ -1,5 +1,5 @@
 """
-Avaliacao/genre_crud.py
+manual_tests/genre_crud.py
 Este módulo fornece operações CRUD para a entidade Gênero.
 """
 

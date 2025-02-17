@@ -1,5 +1,5 @@
 """
-Avaliacao/movie_crud.py
+manual_tests/movie_crud.py
 Este módulo fornece operações CRUD para a entidade Movie.
 """
 

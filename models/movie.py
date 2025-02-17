@@ -1,6 +1,9 @@
 from models.base import Base
 from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey, CheckConstraint, UniqueConstraint, event
 from sqlalchemy.orm import validates, relationship, Session
+from datetime import datetime
+
+current_year = datetime.now().year
 
 class Movie(Base):
     __tablename__ = "movies"
@@ -18,7 +21,7 @@ class Movie(Base):
 
     __table_args__ = (
         CheckConstraint("LENGTH(title) > 0 AND LENGTH(title) <= 200", name="check_movie_title"),
-        CheckConstraint("year BETWEEN 1888 AND 2100", name="check_movie_year"),
+        CheckConstraint(f"year BETWEEN 1888 AND {current_year}", name="check_movie_year"),
         CheckConstraint("duration IS NULL OR duration > 0", name="check_movie_duration"),
         CheckConstraint("rating IS NULL OR (rating BETWEEN 0 AND 10)", name="check_movie_rating"),
         UniqueConstraint("title", "year", "duration", name="uq_movie_title_year_duration"),
@@ -35,8 +38,8 @@ class Movie(Base):
 
     @validates("year")
     def validate_year(self, key, value):
-        if not isinstance(value, int) or not (1888 <= value <= 2100):
-            raise ValueError("Year must be an integer between 1888 and 2100.")
+        if not isinstance(value, int) or not (1888 <= value <= current_year):
+            raise ValueError(f"Year must be an integer between 1888 and {current_year}.")
         return value
 
     @validates("duration")
@@ -58,8 +61,8 @@ def validate_movie_before_commit(session, flush_context, instances):
         if isinstance(instance, Movie):
             if not isinstance(instance.title, str) or not instance.title.strip() or len(instance.title) > 200:
                 raise ValueError("Title must be a non-empty string with a maximum of 200 characters.")
-            if not isinstance(instance.year, int) or not (1888 <= instance.year <= 2100):
-                raise ValueError("Year must be an integer between 1888 and 2100.")
+            if not isinstance(instance.year, int) or not (1888 <= instance.year <= current_year):
+                raise ValueError(f"Year must be an integer between 1888 and {current_year}.")
             if instance.duration is not None and (not isinstance(instance.duration, int) or instance.duration <= 0):
                 raise ValueError("Duration must be a positive integer.")
             if instance.rating is not None and (not isinstance(instance.rating, int) or not (0 <= instance.rating <= 10)):

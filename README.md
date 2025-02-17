@@ -6,7 +6,7 @@ SQLAlchemy/
 │   ├── workflows
 │       ├── ci-cd.yml
 ├── venv/
-├── Avaliacao/
+├── manual_tests/
 │   ├── __init__.py                     # Inicializa o pacote models (opcional)
 │   ├── actor_crud.py
 │   ├── cinema_session_crud.py

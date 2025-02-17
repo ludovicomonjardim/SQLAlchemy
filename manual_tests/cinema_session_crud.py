@@ -1,5 +1,5 @@
 """
-Avaliacao/cinema_session_crud.py
+manual_tests/cinema_session_crud.py
 Este módulo fornece operações CRUD para a entidade CinemaSession.
 """
 

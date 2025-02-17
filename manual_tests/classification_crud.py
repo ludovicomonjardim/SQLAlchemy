@@ -1,5 +1,5 @@
 """
-Avaliacao/classification_crud.py
+manual_tests/classification_crud.py
 Este módulo fornece operações CRUD para a entidade Classificação.
 """
 

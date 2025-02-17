@@ -43,46 +43,11 @@ class ActorRepository(CrudBaseRepository):
     def delete(self, where, session):
         """
         Exclui um ou mais atores e suas associações com filmes.
-        - Recebe `where`, que pode ser um dicionário (exclusão única) ou uma lista de filtros (exclusão múltipla).
-        - Remove as associações antes de excluir o ator.
-        - Retorna um dicionário indicando sucesso ou falha da operação.
+        - Remove todas as dependências antes de excluir o ator.
+        - Usa `delete_with_dependencies()` para garantir exclusão segura.
         """
 
-        if not where:
-            return {"success": False, "error": "Erro: Nenhum critério de exclusão fornecido."}
-
-        try:
-            # Se `where` for um dicionário, usa `filter_by`
-            if isinstance(where, dict):
-                actor_to_delete = session.query(Actor).filter_by(**where).first()
-                if not actor_to_delete:
-                    return {"success": False, "error": "Erro: Ator não encontrado."}
-
-                # Exclui associações do ator antes de removê-lo
-                movie_actor_repo = MovieActorRepository()
-                result_associations = movie_actor_repo.delete({"id": actor_to_delete.id}, ignore_if_not_found=True)
-                if not result_associations["success"]:
-                    return result_associations
-
-                result = super().delete(where)
-                if not result["success"]:
-                    return result
-
-                return {"success": True, "message": f"Ator '{actor_to_delete.name}' removido com sucesso."}
-
-            # Se `where` for uma lista, usa `filter`
-            elif isinstance(where, list):
-                query = session.query(Actor).filter(*where)
-                deleted_count = query.delete(synchronize_session=False)
-
-                if deleted_count == 0:
-                    return {"success": False, "error": "Nenhum ator encontrado para exclusão."}
-
-                return {"success": True, "deleted_count": deleted_count}
-
-            else:
-                return {"success": False,
-                        "error": "Erro: O parâmetro `where` deve ser um dicionário ou uma lista de filtros."}
-
-        except Exception as e:
-            return {"success": False, "error": f"Erro ao excluir registros: {e}"}
+        return super().delete_with_dependencies(
+            where=where,
+            related_models=[(MovieActorRepository.model, "actor_id")]
+        )

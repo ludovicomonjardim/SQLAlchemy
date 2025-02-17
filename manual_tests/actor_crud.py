@@ -17,19 +17,19 @@ class ActorCrud:
         self.report()
 
         self.insert()
-        # self.report()
+        self.report()
 
         self.update()
-        # self.report()
+        self.report()
 
         self.delete()
-        # self.report()
+        self.report()
 
         self.insert_multi()
-        # self.report()
+        self.report()
 
         self.delete_multi()
-        # self.report()
+        self.report()
 
         self.insert_dupli()
 
@@ -43,10 +43,8 @@ class ActorCrud:
         print(f"\nINSERT - {self.tabel_name.upper()}")
         result = self.table_repo.insert({"name": self.name_to_insert})
         if result["success"]:
-            self.ids_inserted = result["data"]  # Agora receberá diretamente o ID
-            print(f"Deveria ser uma lista com os IDs das inserções: {self.ids_inserted}")
-            
-            print(f"\nO nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
+            self.ids_inserted = result["data"]
+            print(f"O nome {self.name_to_insert}, ID '{self.ids_inserted}', foi inserido com sucesso")
         else:
             logging.error(result["error"])
 
@@ -65,7 +63,7 @@ class ActorCrud:
 
         if result["success"]:
             self.ids_inserted = result["data"]  # Agora receberá diretamente o ID
-            print(f"\nO nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
+            print(f"O nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
         else:
             logging.error(result["error"])
             print(result["error"])
@@ -90,7 +88,7 @@ class ActorCrud:
             if isinstance(self.ids_inserted_multi, list) and len(self.ids_inserted_multi) > 0:
                 print("IDs inseridos com sucesso!")
             else:
-                print(f"Nenhum registro foi inserido.")
+                print("Nenhum registro foi inserido.")
         else:
             print(f"Erro na inserção múltipla: {result['error']}")
 
@@ -99,7 +97,7 @@ class ActorCrud:
         new_name = names.get_full_name()
         result = self.table_repo.update(where={"id": self.ids_inserted}, with_={"name": new_name})
         if result["success"]:
-            print(f"O nome no ID: {self.ids_inserted} agora é {new_name}. Atualização bem-sucedida.")
+            print(f"O nome no ID '{self.ids_inserted}' agora é {new_name}. Atualização bem-sucedida.")
         else:
             logging.error(result["error"])
 
@@ -109,6 +107,7 @@ class ActorCrud:
         if result["success"]:
             print("Exclusão bem-sucedida.")
         else:
+            print(f"FALHA NA EXCLUSÃO! id: {self.ids_inserted}")
             logging.error(result["error"])
 
     def delete_multi(self):

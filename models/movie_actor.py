@@ -1,17 +1,17 @@
 from models.base import Base
-from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, CheckConstraint, event
+from sqlalchemy import Column, Integer, String, ForeignKey, UniqueConstraint, CheckConstraint, event, PrimaryKeyConstraint
 from sqlalchemy.orm import validates, Session
 
 class MovieActor(Base):
-    __tablename__ = "movie_actors"  # Nome padronizado no singular
+    __tablename__ = "movie_actor"  # Nome padronizado no singular
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
     movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
     actor_id = Column(Integer, ForeignKey("actors.id"), nullable=False)
     role = Column(String(100), nullable=True)
 
     __table_args__ = (
         UniqueConstraint("movie_id", "actor_id", name="uq_movie_actor"),
+        PrimaryKeyConstraint("movie_id", "actor_id"),
         CheckConstraint("LENGTH(role) > 0 OR role IS NULL", name="check_movie_actor_role"),
     )
 

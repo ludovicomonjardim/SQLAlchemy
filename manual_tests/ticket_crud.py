@@ -1,5 +1,5 @@
 """
-Avaliacao/ticket_crud.py
+manual_tests/ticket_crud.py
 Este módulo fornece operações CRUD para a entidade Ticket.
 """
 
