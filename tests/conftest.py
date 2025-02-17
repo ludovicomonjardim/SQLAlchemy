@@ -1,8 +1,9 @@
 import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
-from models.base import Base  # Importando a base do SQLAlchemy
 from database import DATABASE_URL  # A URL do banco de dados
+from database import engine, Session
+from models.base import Base
 
 @pytest.fixture(scope="function")
 def session():
@@ -19,3 +20,12 @@ def session():
     # Fechar a sessão após o teste
     session.close()
     Base.metadata.drop_all(engine)  # Remove as tabelas ao final do teste
+
+@pytest.fixture(scope="function")
+def db_session():
+    """Cria um banco de testes e garante que cada teste tenha um ambiente limpo."""
+    Base.metadata.create_all(engine)  # Cria as tabelas
+    session = Session()
+    yield session  # Executa o teste
+    session.rollback()  # Desfaz todas as operações
+    session.close()

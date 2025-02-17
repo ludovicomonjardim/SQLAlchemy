@@ -37,8 +37,8 @@ def main():
         # GenreCrud()
         # ClassificationCrud()
         # CinemaSessionCrud()
-        TicketCrud()
-        # MovieCrud()
+        # TicketCrud()
+        MovieCrud()
 
         logging.info("Fim dos Cruds.")
     except Exception as e:
