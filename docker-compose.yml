@@ -1,3 +1,4 @@
+version: '3.8'
 services:
   db:
     image: postgres:latest
@@ -7,9 +8,10 @@ services:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: admin
       POSTGRES_DB: cinema
+      TEST_POSTGRES_DB: test_cinema  # ✅ Define um banco separado para testes
     ports:
       - "5432:5432"
-    healthcheck:  # Adiciona um healthcheck para saber quando o PostgreSQL estiver pronto
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d cinema"]
       interval: 5s
       timeout: 3s
@@ -20,7 +22,7 @@ services:
     container_name: sqlalchemy-app
     depends_on:
       db:
-        condition: service_healthy  # Garante que o PostgreSQL esteja pronto antes de iniciar a aplicação
+        condition: service_healthy
     environment:
       DATABASE_URL: postgresql+psycopg2://postgres:admin@db:5432/cinema
       DOCKER_ENV: "true"

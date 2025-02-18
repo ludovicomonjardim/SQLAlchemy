@@ -1,4 +1,5 @@
-from sqlalchemy import create_engine
+import os
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
 
@@ -13,7 +14,6 @@ from models.movie_director import MovieDirector
 from models.movie_genre import MovieGenre
 from models.cinema_session import CinemaSession
 from models.ticket import Ticket
-import os
 
 import logging
 from utils.logging_config import setup_logger
@@ -21,21 +21,27 @@ from utils.logging_config import setup_logger
 # Configura o logger
 setup_logger()
 
+# Forçar o uso do banco de testes ao rodar initialize_database()
+if "PYTEST_RUNNING" not in os.environ:
+    os.environ["PYTEST_RUNNING"] = "true"
+
 # Verifica se está rodando dentro do Docker
 DOCKER_ENV = os.getenv("DOCKER_ENV", "false").lower() == "true"
 
-# Define a URL do banco
-DATABASE_URL = os.getenv("DATABASE_URL")
+# Verifica se está rodando testes e escolhe o banco adequado
+if os.getenv("PYTEST_RUNNING", "false").lower() == "true":
+    DATABASE_URL = "postgresql+psycopg2://postgres:admin@localhost:5432/test_cinema"
+elif DOCKER_ENV:
+    DATABASE_URL = "postgresql+psycopg2://postgres:admin@db:5432/cinema"
+else:
+    DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
 
-# Fallback para desenvolvimento
 if not DATABASE_URL:
-    if DOCKER_ENV:
-        DATABASE_URL = "postgresql+psycopg2://postgres:admin@db:5432/cinema"
-    else:
-        DATABASE_URL = "postgresql+psycopg2://postgres:admin@localhost:5432/cinema"
-
-if not DATABASE_URL and not DOCKER_ENV:
     raise RuntimeError("DATABASE_URL não definida e não estamos rodando no Docker.")
+
+# Forçar o uso do banco de testes ao rodar initialize_database()
+if "PYTEST_RUNNING" not in os.environ:
+    os.environ["PYTEST_RUNNING"] = "true"
 
 logging.info(f"Using database URL: {DATABASE_URL}")
 
@@ -51,18 +57,20 @@ def get_session():
 
 
 def initialize_database():
-    """Cria as tabelas do banco de dados garantindo a ordem correta."""
-    logging.info("Criando tabelas na ordem correta...")
-    # Base.metadata.create_all(engine)
+    """Cria as tabelas do banco de dados garantindo que todas sejam removidas antes."""
 
-    # Usando __table__.create() ao invés de Base.metadata.create_all(engine)
-    # para garantir a ordem de criação das tabelas
+    logging.info("Removendo todas as tabelas existentes com CASCADE...")
+    with engine.connect() as connection:
+        connection.execute(text("DROP SCHEMA public CASCADE"))
+        connection.execute(text("CREATE SCHEMA public"))
+        connection.commit()
+
+    logging.info("Criando tabelas na ordem correta...")
     Classification.__table__.create(engine, checkfirst=True)
     Genre.__table__.create(engine, checkfirst=True)
     Director.__table__.create(engine, checkfirst=True)
     Actor.__table__.create(engine, checkfirst=True)
 
-    # Criar tabelas que dependem das anteriores
     Movie.__table__.create(engine, checkfirst=True)
     MovieGenre.__table__.create(engine, checkfirst=True)
     MovieDirector.__table__.create(engine, checkfirst=True)
