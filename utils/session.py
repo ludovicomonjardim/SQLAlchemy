@@ -61,12 +61,12 @@ def session_manager(commit=True):  # Parâmetro para definir se deve dar commit
                     if session.is_active:
                         session.rollback()
                     logging.warning(f"Session: Erro geral do SQLAlchemy na função '{func.__name__}': {e}", exc_info=True)
-                    return {"success": False, "error": "Erro inesperado no SQLAlchemy. Verifique a lógica da aplicação."}
+                    return {"success": False, "error": "SQLAlchemyError. Verifique a lógica da aplicação."}
 
                 except ValueError as e:
                     if session.is_active:
                         session.rollback()
-                    logging.warning(f"Session: Erro de validação: {e}")  # Alterado para warning
+                    logging.warning(f"Session: Erro de validação: '{func.__name__}': {e}")  # Alterado para warning
                     return {"success": False, "error": str(e)}
 
                 except Exception as e:

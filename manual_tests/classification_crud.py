@@ -53,9 +53,9 @@ class ClassificationCrud:
         result = self.table_repo.insert(new_classification)
         if result["success"]:
             self.ids_inserted = result["data"]
-            print(f"A classificação {new_classification['name']}, ID: {self.ids_inserted}, foi inserida com sucesso.")
+            print(f"✅ A classificação {new_classification['name']}, ID: {self.ids_inserted}, foi inserida com sucesso.")
         else:
-            print(f"Erro ao inserir classificação: {result['error']}")
+            print(f"❌ Erro ao inserir classificação: {result['error']}")
             logging.error(result["error"])
 
     def insert_multi(self):
@@ -74,11 +74,11 @@ class ClassificationCrud:
         if result["success"]:
             self.ids_inserted_multi = result["data"]
             if isinstance(self.ids_inserted_multi, list) and len(self.ids_inserted_multi) > 0:
-                print("IDs inseridos com sucesso!")
+                print("✅ IDs inseridos com sucesso!")
             else:
-                print("Nenhum registro foi inserido.")
+                print("❌ Nenhum registro foi inserido.")
         else:
-            print(f"Erro na inserção múltipla: {result['error']}")
+            print(f"❌ Erro na inserção múltipla: {result['error']}")
 
     def update(self):
         print(f"\nUPDATE - {self.tabel_name.upper()}")
@@ -88,7 +88,7 @@ class ClassificationCrud:
         }
         result = self.table_repo.update(where={"id": self.ids_inserted}, with_=new_data)
         if result["success"]:
-            print(f"A classificação no ID: {self.ids_inserted} foi atualizada com sucesso.")
+            print(f"✅ A classificação no ID: {self.ids_inserted} foi atualizada com sucesso.")
         else:
             print(f"Erro ao atualizar classificação: {result['error']}")
             logging.error(result["error"])
@@ -96,22 +96,22 @@ class ClassificationCrud:
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
         if not self.ids_inserted:
-            print("Nenhum ID armazenado para exclusão.")
+            print("❌ Nenhum ID armazenado para exclusão.")
             return
 
         # Tentando excluir a classificação inserida
         result = self.table_repo.delete(where={"id": self.ids_inserted})
 
         if result["success"]:
-            print(f"A classificação ID {self.ids_inserted} foi excluída com sucesso.")
+            print(f"✅ A classificação ID {self.ids_inserted} foi excluída com sucesso.")
         else:
-            print(f"Erro ao excluir classificação: {result['error']}")
+            print(f"❌ Erro ao excluir classificação: {result['error']}")
 
     def delete_multi(self):
         print(f"\nDELETE MULTI - {self.tabel_name.upper()}")
 
         if not self.ids_inserted_multi:
-            print("Nenhum ID armazenado para exclusão.")
+            print("❌ Nenhum ID armazenado para exclusão.")
             return
 
         # Criando filtro para excluir múltiplos IDs
@@ -121,9 +121,9 @@ class ClassificationCrud:
         result = self.table_repo.delete(filters)
 
         if result["success"]:
-            print("Registros excluídos com sucesso!")
+            print("✅ Registros excluídos com sucesso!")
         else:
-            print(f"Erro ao excluir múltiplos registros: {result['error']}")
+            print(f"❌ Erro ao excluir múltiplos registros: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
@@ -133,10 +133,10 @@ class ClassificationCrud:
                                          order_by=["name asc"],
                                          limit=10)
         if not result["success"]:
-            print(f"Erro ao recuperar classificações: {result['error']}")
+            print(f"❌ Erro ao recuperar classificações: {result['error']}")
             return
 
         records = result["data"]
         print("Resultado do SELECT:")
         for record in records:
-            print(f"{record.id} | {record.name:<20} | {record.description:<50} | {record.min_age}")
+            print(f"✅ {record.id} | {record.name:<20} | {record.description:<50} | {record.min_age}")

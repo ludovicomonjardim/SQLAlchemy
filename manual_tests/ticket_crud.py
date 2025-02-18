@@ -43,9 +43,9 @@ class TicketCrud:
         result = self.table_repo.insert(new_ticket)
         if result["success"]:
             self.ids_inserted = result["data"]
-            print(f"Ingresso ID {self.ids_inserted} foi inserido com sucesso.")
+            print(f"✅ Ingresso ID {self.ids_inserted} foi inserido com sucesso.")
         else:
-            print(f"Erro ao inserir ingresso: {result['error']}")
+            print(f"❌ Erro ao inserir ingresso: {result['error']}")
             logging.error(result["error"])
 
     def insert_multi(self):
@@ -61,9 +61,9 @@ class TicketCrud:
         result = self.table_repo.insert(tickets_data)
         if result["success"]:
             self.ids_inserted_multi = result["data"]
-            print(f"IDs inseridos com sucesso!")
+            print(f"✅ IDs inseridos com sucesso!")
         else:
-            print(f"Erro na inserção múltipla: {result['error']}")
+            print(f"❌ Erro na inserção múltipla: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
@@ -74,11 +74,11 @@ class TicketCrud:
                                          limit=10)
 
         if not result["success"]:
-            print(f"Erro ao recuperar ingressos: {result['error']}")
+            print(f"❌ Erro ao recuperar ingressos: {result['error']}")
             return
 
         records = result["data"]
 
         print("Resultado do SELECT:")
         for record in records:
-            print(f"{record.id} | {record.cinema_session_id} | {record.customer:<30} | {record.purchase_date}")
+            print(f"✅ {record.id} | {record.cinema_session_id} | {record.customer:<30} | {record.purchase_date}")

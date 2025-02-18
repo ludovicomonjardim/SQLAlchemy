@@ -21,29 +21,30 @@ from utils.logging_config import setup_logger
 # Configura o logger
 setup_logger()
 
-# Forçar o uso do banco de testes ao rodar initialize_database()
-if "PYTEST_RUNNING" not in os.environ:
-    os.environ["PYTEST_RUNNING"] = "true"
-
 # Verifica se está rodando dentro do Docker
 DOCKER_ENV = os.getenv("DOCKER_ENV", "false").lower() == "true"
+description = ""
 
 # Verifica se está rodando testes e escolhe o banco adequado
 if os.getenv("PYTEST_RUNNING", "false").lower() == "true":
     DATABASE_URL = "postgresql+psycopg2://postgres:admin@localhost:5432/test_cinema"
+    decription = "Banco de testes"
 elif DOCKER_ENV:
     DATABASE_URL = "postgresql+psycopg2://postgres:admin@db:5432/cinema"
+    description = "Banco do Docker"
 else:
     DATABASE_URL = os.getenv("DATABASE_URL", "postgresql+psycopg2://postgres:admin@localhost:5432/cinema")
+    description = "Banco local"
 
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL não definida e não estamos rodando no Docker.")
 
-# Forçar o uso do banco de testes ao rodar initialize_database()
-if "PYTEST_RUNNING" not in os.environ:
-    os.environ["PYTEST_RUNNING"] = "true"
+# # Forçar o uso do banco de testes ao rodar initialize_database()
+# if "PYTEST_RUNNING" not in os.environ:
+#     os.environ["PYTEST_RUNNING"] = "true"
+#     description = "Banco de testes"
 
-logging.info(f"Using database URL: {DATABASE_URL}")
+logging.info(f"Using database: {description.upper()} - URL: {DATABASE_URL}")
 
 # Criando a engine
 engine = create_engine(DATABASE_URL, pool_size=10, max_overflow=20, echo=False)

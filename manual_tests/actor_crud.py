@@ -44,9 +44,10 @@ class ActorCrud:
         result = self.table_repo.insert({"name": self.name_to_insert})
         if result["success"]:
             self.ids_inserted = result["data"]
-            print(f"O nome {self.name_to_insert}, ID '{self.ids_inserted}', foi inserido com sucesso")
+            print(f"✅ O nome {self.name_to_insert}, ID '{self.ids_inserted}', foi inserido com sucesso")
         else:
             logging.error(result["error"])
+            print(f"❌ FALHA NO INSERT! {result['error']}")
 
     def insert_dupli(self):
         print(f"\nINSERT DUPLI - {self.tabel_name.upper()}")
@@ -63,10 +64,10 @@ class ActorCrud:
 
         if result["success"]:
             self.ids_inserted = result["data"]  # Agora receberá diretamente o ID
-            print(f"O nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
+            print(f"✅ O nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
         else:
             logging.error(result["error"])
-            print(result["error"])
+            print(f"❌ FALHA NO INSERT {result['error']}")
 
     def insert_multi(self):
         print(f"\nINSERT MULTI - {self.tabel_name.upper()}")
@@ -86,35 +87,42 @@ class ActorCrud:
             self.ids_inserted_multi = result["data"]
 
             if isinstance(self.ids_inserted_multi, list) and len(self.ids_inserted_multi) > 0:
-                print("IDs inseridos com sucesso!")
+                print("✅ IDs inseridos com sucesso!")
             else:
-                print("Nenhum registro foi inserido.")
+                print("❌ Nenhum registro foi inserido.")
         else:
-            print(f"Erro na inserção múltipla: {result['error']}")
+            print(f"❌ Erro na inserção múltipla: {result['error']}")
 
     def update(self):
         print(f"\nUPDATE - {self.tabel_name.upper()}")
         new_name = names.get_full_name()
         result = self.table_repo.update(where={"id": self.ids_inserted}, with_={"name": new_name})
         if result["success"]:
-            print(f"O nome no ID '{self.ids_inserted}' agora é {new_name}. Atualização bem-sucedida.")
+            print(f"✅ O nome no ID '{self.ids_inserted}' agora é {new_name}. Atualização bem-sucedida.")
         else:
             logging.error(result["error"])
+            print("❌ FALHA NO UPDATE")
 
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
+        if not self.ids_inserted:
+            print("❌ Nenhum ID armazenado para exclusão.")
+            return
+
+        # Tentando excluir a classificação inserida
         result = self.table_repo.delete(where={"id": self.ids_inserted})
+
         if result["success"]:
-            print("Exclusão bem-sucedida.")
+            print("✅ O ator ID {self.ids_inserted} foi excluída com sucesso.")
         else:
-            print(f"FALHA NA EXCLUSÃO! id: {self.ids_inserted}")
+            print(f"❌ FALHA NA EXCLUSÃO! id: {self.ids_inserted} - {result['error']}")
             logging.error(result["error"])
 
     def delete_multi(self):
         print(f"\nDELETE MULTI - {self.tabel_name.upper()}")
 
         if not self.ids_inserted_multi:
-            print("Nenhum ID armazenado para exclusão.")
+            print("❌ Nenhum ID armazenado para exclusão.")
             return
 
         # Criando filtro para excluir múltiplos IDs
@@ -123,9 +131,9 @@ class ActorCrud:
         # Chamando a função de exclusão múltipla
         result = self.table_repo.delete(filters)
         if result["success"]:
-            print("Registros excluídos com sucesso!")
+            print("✅ Registros excluídos com sucesso!")
         else:
-            print(f"Erro ao excluir múltiplos registros: {result['error']}")
+            print(f"❌ Erro ao excluir múltiplos registros: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
@@ -136,10 +144,10 @@ class ActorCrud:
                                         order_by=["name asc"],
                                         limit=10)
         if not result["success"]:
-            print(f"Erro ao recuperar atores: {result['error']}")
+            print(f"❌ Erro ao recuperar atores: {result['error']}")
             return
 
         records = result["data"]
-        print("Resultado do SELECT:")
+        print("✅ Resultado do SELECT:")
         for record in records:
             print(f"{record.id} | {record.name}")

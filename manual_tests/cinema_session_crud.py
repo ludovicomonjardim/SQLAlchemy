@@ -57,9 +57,9 @@ class CinemaSessionCrud:
         result = self.table_repo.insert(new_movie_session)
         if result["success"]:
             self.ids_inserted = result["data"]
-            print(f"Sessão de cinema ID {self.ids_inserted} foi inserida com sucesso.")
+            print(f"✅ Sessão de cinema ID {self.ids_inserted} foi inserida com sucesso.")
         else:
-            print(f"Erro ao inserir sessão de cinema: {result['error']}")
+            print(f"❌ Erro ao inserir sessão de cinema: {result['error']}")
             logging.error(result["error"])
 
     def insert_multi(self):
@@ -75,9 +75,9 @@ class CinemaSessionCrud:
         result = self.table_repo.insert(sessions_data)
         if result["success"]:
             self.ids_inserted_multi = result["data"]
-            print(f"IDs inseridos com sucesso!")
+            print(f"✅ IDs inseridos com sucesso!")
         else:
-            print(f"Erro na inserção múltipla: {result['error']}")
+            print(f"❌ Erro na inserção múltipla: {result['error']}")
 
     def update(self):
         print(f"\nUPDATE - {self.tabel_name.upper()}")
@@ -87,28 +87,28 @@ class CinemaSessionCrud:
         }
         result = self.table_repo.update(where={"id": self.ids_inserted}, with_=new_data)
         if result["success"]:
-            print(f"A sessão de cinema ID: {self.ids_inserted} foi atualizada com sucesso.")
+            print(f"✅ A sessão de cinema ID: {self.ids_inserted} foi atualizada com sucesso.")
         else:
-            print(f"Erro ao atualizar sessão de cinema: {result['error']}")
+            print(f"❌ Erro ao atualizar sessão de cinema: {result['error']}")
             logging.error(result["error"])
 
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
         if not self.ids_inserted:
-            print("Nenhum ID armazenado para exclusão.")
+            print("❌ Nenhum ID armazenado para exclusão.")
             return
 
         result = self.table_repo.delete(where={"id": self.ids_inserted})
         if result["success"]:
-            print(f"A sessão de cinema ID {self.ids_inserted} foi excluída com sucesso.")
+            print(f"✅ A sessão de cinema ID {self.ids_inserted} foi excluída com sucesso.")
         else:
-            print(f"Erro ao excluir sessão de cinema: {result['error']}")
+            print(f"❌ Erro ao excluir sessão de cinema: {result['error']}")
 
     def delete_multi(self):
         print(f"\nDELETE MULTI - {self.tabel_name.upper()}")
 
         if not self.ids_inserted_multi:
-            print("Nenhum ID armazenado para exclusão.")
+            print("❌ Nenhum ID armazenado para exclusão.")
             return
 
         filters = [CinemaSession.id.in_(self.ids_inserted_multi)]
@@ -116,9 +116,9 @@ class CinemaSessionCrud:
         result = self.table_repo.delete(filters)
 
         if result["success"]:
-            print("Registros excluídos com sucesso!")
+            print("✅ Registros excluídos com sucesso!")
         else:
-            print(f"Erro ao excluir múltiplos registros: {result['error']}")
+            print(f"❌ Erro ao excluir múltiplos registros: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
@@ -129,11 +129,11 @@ class CinemaSessionCrud:
                                          limit=10)
 
         if not result["success"]:
-            print(f"Erro ao recuperar seçoes de cinema: {result['error']}")
+            print(f"❌ Erro ao recuperar seçoes de cinema: {result['error']}")
             return
 
         records = result["data"]
 
         print("Resultado do SELECT:")
         for record in records:
-            print(f"{record.id} | {record.date} | {record.time} | {record.room} | {record.capacity} | {record.price}")
+            print(f"✅ {record.id} | {record.date} | {record.time} | {record.room} | {record.capacity} | {record.price}")

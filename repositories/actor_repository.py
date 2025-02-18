@@ -40,14 +40,10 @@ class ActorRepository(CrudBaseRepository):
             print("Nenhum ator encontrado na tabela.")
 
     @session_manager(commit=True)  # Dá commit, pois altera dados
-    def delete(self, where, session):
-        """
-        Exclui um ou mais atores e suas associações com filmes.
-        - Remove todas as dependências antes de excluir o ator.
-        - Usa `delete_with_dependencies()` para garantir exclusão segura.
-        """
-
+    def delete(self, where):
         return super().delete_with_dependencies(
             where=where,
             related_models=[(MovieActorRepository.model, "actor_id")]
         )
+
+

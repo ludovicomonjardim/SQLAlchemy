@@ -1,81 +1,167 @@
 import pytest
-from sqlalchemy.exc import IntegrityError
-from repositories.actor_repository import ActorRepository
 from models.actor import Actor
-from database import initialize_database, get_session
-
-
-@pytest.fixture(scope="function")
-def session():
-    """Cria uma sessão temporária para os testes."""
-    initialize_database()
-    session = get_session()
-    yield session
-    session.rollback()
-    session.close()
+from models.movie import Movie
+from models.movie_actor import MovieActor
+from models.classification import Classification
+from repositories.actor_repository import ActorRepository
 
 
 @pytest.fixture(scope="function")
 def actor_repo(session):
-    """Instancia o repositório de atores para os testes."""
+    """Retorna uma instância do repositório de atores usando a sessão de teste."""
     return ActorRepository()
 
 
-def test_insert_actor(actor_repo, session):
-    """Testa a inserção de um ator."""
-    actor = {"name": "Leonardo DiCaprio"}
-    actor_repo.insert(actor)
+def test_insert_actor(session, actor_repo):
+    """Testa a inserção de um ator válido no banco de dados."""
 
-    inserted_actor = session.query(Actor).filter_by(name="Leonardo DiCaprio").first()
-    assert inserted_actor is not None
-    assert inserted_actor.name == "Leonardo DiCaprio"
+    # Tenta inserir um ator válido
+    result = actor_repo.insert({"name": "Leonardo DiCaprio"})
+
+    # Verifica se a inserção foi bem-sucedida
+    assert result["success"] is True
+
+    # Obtém o ID do ator inserido
+    inserted_actor_id = result["data"]
+    assert isinstance(inserted_actor_id, int)  # Garante que o retorno é um ID válido
+
+    # Busca o ator no banco usando o ID retornado
+    actor = session.get(Actor, inserted_actor_id)  # SQLAlchemy 2.0 (mais eficiente)
+
+    # Confirma que o ator foi inserido corretamente
+    assert actor is not None
+    assert actor.name == "Leonardo DiCaprio"
 
 
-def test_update_actor(actor_repo, session):
-    """Testa a atualização do nome de um ator garantindo que os nomes não existam previamente."""
+def test_delete_actor_with_dependencies(session, actor_repo):
+    """Testa a exclusão de um ator que está relacionado a um filme na tabela movie_actor."""
+    from models.classification import Classification
+    from models.movie import Movie
+    from models.movie_actor import MovieActor
 
-    # Remove qualquer ator com os nomes envolvidos no teste para evitar conflitos
-    session.query(Actor).filter(Actor.name.in_(["Ludo", "Ludovico Monjardim"])).delete(synchronize_session=False)
+    # Criar uma classificação válida antes do filme
+    classification = Classification(id=1, name="PG-13", description="Apenas maiores de 13 anos", min_age=13)
+    session.add(classification)
     session.commit()
 
-    # Insere um ator com um nome único
-    actor_repo.insert({"name": "Ludo"})
-    inserted_actor = session.query(Actor).filter_by(name="Ludo").first()
+    # Criar um ator e um filme
+    actor = Actor(name="Johnny Depp")
+    movie = Movie(title="Pirates of the Caribbean", year=2003, classification_id=1)
+    session.add(actor)
+    session.add(movie)
+    session.commit()
 
-    # Atualiza o nome do ator
-    actor_repo.update(where={"name": "Ludo"}, with_={"name": "Ludovico Monjardim"})
-    session.expire_all()
-    updated_actor = session.query(Actor).filter_by(id=inserted_actor.id).first()
+    # Criar a relação entre ator e filme
+    movie_actor = MovieActor(movie_id=movie.id, actor_id=actor.id)
+    session.add(movie_actor)
+    session.commit()
 
-    # Valida se o nome foi atualizado corretamente
-    assert updated_actor.name == "Ludovico Monjardim"
+    # Garante que a relação foi criada corretamente
+    assert session.query(MovieActor).filter_by(actor_id=actor.id).count() == 1
+
+    # Exclui o ator e verifica se a relação em movie_actor foi removida
+    result = actor_repo.delete({"id": actor.id})
+
+    print(f"\n\n DEBUG 1: Resultado da exclusão do ator -> {result}\n\n")
+
+    # Debug: Verificar se o ator ainda está no banco
+    remaining_actor = session.get(Actor, actor.id)
+    print(f"\n\n DEBUG 2: Ator encontrado após exclusão? {remaining_actor}\n\n")
+
+    assert result["success"] is True
+    assert session.query(MovieActor).filter_by(actor_id=actor.id).count() == 0
+    assert remaining_actor is None  # 🔹 Esse assert está falhando
 
 
-def test_delete_actor(actor_repo, session):
-    """Testa a remoção de um ator."""
-    actor_repo.insert({"name": "Brad Pitt"})
-    inserted_actor = session.query(Actor).filter_by(name="Brad Pitt").first()
-    assert inserted_actor is not None
 
-    actor_repo.delete(where={"name": "Brad Pitt"})
-    deleted_actor = session.query(Actor).filter_by(name="Brad Pitt").first()
+
+
+def test_select_actor(session, actor_repo):
+    """Testa a consulta de um ator existente."""
+    actor = Actor(name="Meryl Streep")
+    session.add(actor)
+    session.commit()
+
+    result = actor_repo.select(where={"name": "Meryl Streep"})
+    assert result["success"] is True
+    assert len(result["data"]) == 1
+    assert result["data"][0].name == "Meryl Streep"
+
+
+def test_update_actor(session, actor_repo):
+    """Testa a atualização do nome de um ator."""
+    actor = Actor(name="Robert Downey Jr.")
+    session.add(actor)
+    session.commit()
+
+    result = actor_repo.update({"name": "Robert Downey Jr."}, {"name": "RDJ"})
+    assert result["success"] is True
+    updated_actor = session.query(Actor).filter_by(name="RDJ").first()
+    assert updated_actor is not None
+    assert updated_actor.name == "RDJ"
+
+
+def test_delete_actor(session, actor_repo):
+    """Testa a exclusão de um ator."""
+    actor = Actor(name="Tom Hanks")
+    session.add(actor)
+    session.commit()
+
+    result = actor_repo.delete({"name": "Tom Hanks"})
+    assert result["success"] is True
+    deleted_actor = session.query(Actor).filter_by(name="Tom Hanks").first()
     assert deleted_actor is None
 
-def test_unique_constraint(actor_repo, session):
-    """Testa a restrição de unicidade no nome do ator."""
 
-    # Remove o ator se já existir para garantir um teste limpo
-    session.query(Actor).filter(Actor.name == "Morgan Freeman").delete(synchronize_session=False)
+def test_insert_duplicate_actor(session, actor_repo):
+    """Testa erro ao tentar inserir um ator com nome duplicado."""
+    session.add(Actor(name="Morgan Freeman"))
     session.commit()
 
+    result = actor_repo.insert({"name": "Morgan Freeman"})
+    assert result["success"] is False
+    assert "Violação de integridade" in result["error"]
 
-    # Insere o ator pela primeira vez (deve ter sucesso)
-    result1 = actor_repo.insert({"name": "Morgan Freeman"})
-    assert result1["success"] is True, f"Falha na primeira inserção: {result1['error']}"
 
-    # Tenta inserir o mesmo nome novamente (deve falhar)
-    result2 = actor_repo.insert({"name": "Morgan Freeman"})
+def test_insert_invalid_actor(session, actor_repo):
+    """Testa erro ao tentar inserir um ator com nome vazio."""
+    result = actor_repo.insert({"name": ""})
+    assert result["success"] is False
+    assert "Actor name must be a non-empty string" in result["error"]
 
-    assert result2["success"] is False, "A inserção duplicada deveria falhar, mas foi bem-sucedida."
-    assert "Violação de integridade" in result2["error"], f"Erro inesperado: {result2['error']}"
 
+def test_insert_multiple_actors(session, actor_repo):
+    """Testa a inserção de múltiplos atores simultaneamente."""
+    actors = [{"name": "Actor 1"}, {"name": "Actor 2"}, {"name": "Actor 3"}]
+    result = actor_repo.insert(actors)
+    assert result["success"] is True
+    assert len(result["data"]) == 3
+
+
+def test_delete_non_existent_actor(session, actor_repo):
+    """Testa a exclusão de um ator inexistente."""
+    result = actor_repo.delete({"name": "Fake Actor"})
+    assert result["success"] is False
+    assert "Nenhum registro encontrado" in result["error"]
+
+
+def test_select_actor_by_id(session, actor_repo):
+    """Testa a consulta de um ator pelo ID."""
+    actor = Actor(name="Harrison Ford")
+    session.add(actor)
+    session.commit()
+
+    result = actor_repo.select(where={"id": actor.id})
+    assert result["success"] is True
+    assert len(result["data"]) == 1
+    assert result["data"][0].name == "Harrison Ford"
+
+
+def test_bulk_insert_and_delete(session, actor_repo):
+    """Testa inserção e exclusão em lote de atores."""
+    actors = [{"name": "Batch 1"}, {"name": "Batch 2"}, {"name": "Batch 3"}]
+    insert_result = actor_repo.insert(actors)
+    assert insert_result["success"] is True
+
+    delete_result = actor_repo.delete({})
+    assert delete_result["success"] is True

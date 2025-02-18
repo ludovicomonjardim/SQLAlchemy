@@ -26,19 +26,19 @@ def main():
         initialize_database()
 
         # Popula o banco de dados com dados iniciais
-        # logging.info("Populando banco de dados...")
+        logging.info("Populando banco de dados...")
         populate_database()
 
 
         # Inicializa os CRUDs
         # logging.info("Inicializando CRUDs...")
-        # ActorCrud()
+        ActorCrud()
         # DirectorCrud()
         # GenreCrud()
         # ClassificationCrud()
         # CinemaSessionCrud()
         # TicketCrud()
-        MovieCrud()
+        # MovieCrud()
 
         logging.info("Fim dos Cruds.")
     except Exception as e:

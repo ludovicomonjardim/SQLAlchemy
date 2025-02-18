@@ -52,9 +52,9 @@ class MovieCrud:
         result = self.table_repo.insert(self.default_data)
         if result["success"]:
             self.ids_inserted = result["data"]
-            print(f"Filme ID {self.ids_inserted} foi inserido com sucesso.")
+            print(f"✅ Filme ID {self.ids_inserted} foi inserido com sucesso.")
         else:
-            print(f"Erro ao inserir filme: {result['error']}")
+            print(f"❌ Erro ao inserir filme: {result['error']}")
             logging.error(result["error"])
 
     def insert_multi(self):
@@ -70,33 +70,33 @@ class MovieCrud:
         result = self.table_repo.insert(movies_data)
         if result["success"]:
             self.ids_inserted_multi = result["data"]
-            print("IDs inseridos com sucesso!")
+            print("✅ IDs inseridos com sucesso!")
         else:
-            print(f"Erro na inserção múltipla: {result['error']}")
+            print(f"❌ Erro na inserção múltipla: {result['error']}")
 
     def update(self):
         print(f"\nUPDATE - {self.tabel_name.upper()}")
         new_data = {"rating": 10, "duration": 140}
         result = self.table_repo.update(where={"id": self.ids_inserted}, with_=new_data)
         if result["success"]:
-            print(f"O filme ID: {self.ids_inserted} foi atualizado com sucesso.")
+            print(f"✅ O filme ID: {self.ids_inserted} foi atualizado com sucesso.")
         else:
-            print(f"Erro ao atualizar filme: {result['error']}")
+            print(f"❌ Erro ao atualizar filme: {result['error']}")
             logging.error(result["error"])
 
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
         result = self.table_repo.delete(where={"id": self.ids_inserted})
         if result["success"]:
-            print("Filme excluído com sucesso.")
+            print("✅ Filme excluído com sucesso.")
         else:
-            print(f"Erro ao excluir filme: {result['error']}")
+            print(f"❌ Erro ao excluir filme: {result['error']}")
 
     def delete_multi(self):
         print(f"\nDELETE MULTI - {self.tabel_name.upper()}")
 
         if not self.ids_inserted_multi:
-            print("Nenhum ID armazenado para exclusão.")
+            print("❌ Nenhum ID armazenado para exclusão.")
             return
 
         filters = [Movie.id.in_(self.ids_inserted_multi)]
@@ -104,20 +104,20 @@ class MovieCrud:
         result = self.table_repo.delete(filters)
 
         if result["success"]:
-            print("Registros excluídos com sucesso!")
+            print("✅ Registros excluídos com sucesso!")
         else:
-            print(f"Erro ao excluir múltiplos registros: {result['error']}")
+            print(f"❌ Erro ao excluir múltiplos registros: {result['error']}")
 
     def select(self):
         print(f"\nSELECT - {self.tabel_name.upper()}")
         result = self.table_repo.select(where=None, fields=["id", "title", "year", "duration", "rating"], order_by=["title asc"], limit=10)
 
         if not result["success"]:
-            print(f"Erro ao recuperar filmes: {result['error']}")
+            print(f"❌ Erro ao recuperar filmes: {result['error']}")
             return
 
         records = result["data"]  # 🔹 Obtendo a lista real de filmes
 
         print("Resultado do retrieve:")
         for record in records:
-            print(f"{record.id} | {record.title:<25} | {record.year} | {record.duration} | {record.rating}")
+            print(f"✅ {record.id} | {record.title:<25} | {record.year} | {record.duration} | {record.rating}")
