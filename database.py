@@ -1,4 +1,5 @@
 import os
+from models.base import Base
 from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 from contextlib import contextmanager
@@ -60,27 +61,34 @@ def get_session():
 def initialize_database():
     """Cria as tabelas do banco de dados garantindo que todas sejam removidas antes."""
 
-    logging.info("Removendo todas as tabelas existentes com CASCADE...")
+    logging.info("🔹 Inicializando banco...")
+
     with engine.connect() as connection:
+        logging.info("Removendo todas as tabelas existentes com CASCADE...")
         connection.execute(text("DROP SCHEMA public CASCADE"))
         connection.execute(text("CREATE SCHEMA public"))
         connection.commit()
 
-    logging.info("Criando tabelas na ordem correta...")
-    Classification.__table__.create(engine, checkfirst=True)
-    Genre.__table__.create(engine, checkfirst=True)
-    Director.__table__.create(engine, checkfirst=True)
-    Actor.__table__.create(engine, checkfirst=True)
+    # logging.info("Criando tabelas na ordem correta...")
+    # Classification.__table__.create(engine, checkfirst=True)
+    # Genre.__table__.create(engine, checkfirst=True)
+    # Director.__table__.create(engine, checkfirst=True)
+    # Actor.__table__.create(engine, checkfirst=True)
+    #
+    # Movie.__table__.create(engine, checkfirst=True)
+    # MovieGenre.__table__.create(engine, checkfirst=True)
+    # MovieDirector.__table__.create(engine, checkfirst=True)
+    # MovieActor.__table__.create(engine, checkfirst=True)
+    #
+    # CinemaSession.__table__.create(engine, checkfirst=True)
+    # Ticket.__table__.create(engine, checkfirst=True)
 
-    Movie.__table__.create(engine, checkfirst=True)
-    MovieGenre.__table__.create(engine, checkfirst=True)
-    MovieDirector.__table__.create(engine, checkfirst=True)
-    MovieActor.__table__.create(engine, checkfirst=True)
+    logging.info("🔹 Criando todas as tabelas...")
 
-    CinemaSession.__table__.create(engine, checkfirst=True)
-    Ticket.__table__.create(engine, checkfirst=True)
+    # 🔹 Criar todas as tabelas corretamente
+    Base.metadata.create_all(engine)
 
-    logging.info("Todas as tabelas foram criadas com sucesso!")
+    logging.info("✅ Todas as tabelas foram criadas com sucesso!")
 
 
 @contextmanager

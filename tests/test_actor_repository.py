@@ -1,10 +1,6 @@
 import pytest
 import logging
 from models.actor import Actor
-
-from models.movie import Movie
-from models.movie_actor import MovieActor
-from models.classification import Classification
 from repositories.actor_repository import ActorRepository
 from utils.logging_config import setup_logger
 

@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 class MovieGenre(Base):
     __tablename__ = "movie_genre"  # Nome padronizado no singular
 
-    movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
-    genre_id = Column(Integer, ForeignKey("genres.id"), nullable=False)
+    movie_id = Column(Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False)
+    genre_id = Column(Integer, ForeignKey("genres.id", ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
         UniqueConstraint("movie_id", "genre_id", name="uq_movie_genre"),
