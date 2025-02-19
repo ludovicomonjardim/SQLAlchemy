@@ -38,13 +38,13 @@ class DirectorRepository(CrudBaseRepository):
 
     @session_manager(commit=True)  # Dá commit, pois altera dados
     def delete(self, where, session):
-        """
-        Exclui um ou mais diretores e suas associações com filmes.
-        - Remove todas as dependências antes de excluir o diretor.
-        - Usa `delete_with_dependencies()` para garantir exclusão segura.
-        """
-
         return super().delete_with_dependencies(
             where=where,
             related_models=[(MovieDirectorRepository.model, "director_id")]
         )
+
+
+
+
+
+

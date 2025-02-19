@@ -17,19 +17,19 @@ class ActorCrud:
         self.report()
 
         self.insert()
-        self.report()
+        # self.report()
 
         self.update()
-        self.report()
+        # self.report()
 
         self.delete()
-        self.report()
+        # self.report()
 
         self.insert_multi()
-        self.report()
+        # self.report()
 
         self.delete_multi()
-        self.report()
+        # self.report()
 
         self.insert_dupli()
 
@@ -62,12 +62,12 @@ class ActorCrud:
 
         print(f"result em INSER DUPLI: {result}")
 
-        if result["success"]:
-            self.ids_inserted = result["data"]  # Agora receberá diretamente o ID
-            print(f"✅ O nome {self.name_to_insert}, ID: {self.ids_inserted}, foi inserido com sucesso")
+        if not result["success"]:
+            print(f"✅ Sucesso! O nome {self.name_to_insert} NÃO foi inserido duas vezes. \n{result['error']}")
         else:
+            self.ids_inserted = result["data"]  # Agora receberá diretamente o ID
             logging.error(result["error"])
-            print(f"❌ FALHA NO INSERT {result['error']}")
+            print(f"❌ FALHA NO INSERT DUPLI. O nome {self.name_to_insert} foi inserido duas vezes.")
 
     def insert_multi(self):
         print(f"\nINSERT MULTI - {self.tabel_name.upper()}")
@@ -85,7 +85,6 @@ class ActorCrud:
         # Exibindo o resultado
         if result["success"]:
             self.ids_inserted_multi = result["data"]
-
             if isinstance(self.ids_inserted_multi, list) and len(self.ids_inserted_multi) > 0:
                 print("✅ IDs inseridos com sucesso!")
             else:
@@ -115,8 +114,8 @@ class ActorCrud:
         if result["success"]:
             print("✅ O ator ID {self.ids_inserted} foi excluída com sucesso.")
         else:
-            print(f"❌ FALHA NA EXCLUSÃO! id: {self.ids_inserted} - {result['error']}")
             logging.error(result["error"])
+            print(f"❌ FALHA NA EXCLUSÃO! id: {self.ids_inserted} - {result['error']}")
 
     def delete_multi(self):
         print(f"\nDELETE MULTI - {self.tabel_name.upper()}")

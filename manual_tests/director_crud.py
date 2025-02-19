@@ -35,6 +35,8 @@ class DirectorCrud:
         self.delete_multi()
         # self.report()
 
+        self.insert_dupli()
+
         self.select()
 
     def report(self):
@@ -51,6 +53,27 @@ class DirectorCrud:
             logging.error(result["error"])
             print(f"❌ FALHA NO INSERT! {result['error']}")
 
+    def insert_dupli(self):
+        print(f"\nINSERT DUPLI - {self.tabel_name.upper()}")
+
+        new_name = names.get_full_name()
+
+        # Primeira vez
+        self.table_repo.insert({"name": new_name})
+
+        # Segunda vez
+        result = self.table_repo.insert({"name": new_name})
+
+        print(f"result em INSER DUPLI: {result}")
+
+        if not result["success"]:
+            print(f"✅ Sucesso! O nome {self.name_to_insert} NÃO foi inserido duas vezes. \n{result['error']}")
+        else:
+            self.ids_inserted = result["data"]  # Agora receberá diretamente o ID
+            logging.error(result["error"])
+            print(f"❌ FALHA NO INSERT DUPLI. O nome {self.name_to_insert} foi inserido duas vezes.")
+
+
     def insert_multi(self):
         print(f"\nINSERT MULTI - {self.tabel_name.upper()}")
 
@@ -62,7 +85,9 @@ class DirectorCrud:
             {"name": "Glauber Rocha"},
         ]
 
+        # Chamando a função de inserção múltipla
         result = self.table_repo.insert(directors_data)
+        # Exibindo o resultado
         if result["success"]:
             self.ids_inserted_multi = result["data"]
             if isinstance(self.ids_inserted_multi, list) and len(self.ids_inserted_multi) > 0:
@@ -84,7 +109,13 @@ class DirectorCrud:
 
     def delete(self):
         print(f"\nDELETE - {self.tabel_name.upper()}")
+        if not self.ids_inserted:
+            print("❌ Nenhum ID armazenado para exclusão.")
+            return
+
+        # Tentando excluir a classificação inserida
         result = self.table_repo.delete(where={"id": self.ids_inserted})
+
         if result["success"]:
             print("✅ Exclusão bem-sucedida.")
         else:
