@@ -29,7 +29,7 @@ wait_for_database()
 def session():
     """Cria uma sessão do SQLAlchemy para os testes."""
 
-    # 🔹 Inicializa o banco de dados corretamente antes de cada teste
+    # Inicializa o banco de dados corretamente antes de cada teste
     initialize_database()
 
     # Criar a sessão para os testes
