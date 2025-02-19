@@ -1,10 +1,17 @@
 import pytest
+import logging
 from models.actor import Actor
+
 from models.movie import Movie
 from models.movie_actor import MovieActor
 from models.classification import Classification
 from repositories.actor_repository import ActorRepository
+from utils.logging_config import setup_logger
 
+# Configura o logger
+setup_logger(complete=False)
+
+logging.basicConfig(level=logging.DEBUG)
 
 @pytest.fixture(scope="function")
 def actor_repo(session):
@@ -17,7 +24,6 @@ def test_insert_actor(session, actor_repo):
 
     # Tenta inserir um ator válido
     result = actor_repo.insert({"name": "Leonardo DiCaprio"})
-
     # Verifica se a inserção foi bem-sucedida
     assert result["success"] is True
 
@@ -61,19 +67,14 @@ def test_delete_actor_with_dependencies(session, actor_repo):
 
     # Exclui o ator e verifica se a relação em movie_actor foi removida
     result = actor_repo.delete({"id": actor.id})
-
-    print(f"\n\n DEBUG 1: Resultado da exclusão do ator -> {result}\n\n")
-
-    # Debug: Verificar se o ator ainda está no banco
-    remaining_actor = session.get(Actor, actor.id)
-    print(f"\n\n DEBUG 2: Ator encontrado após exclusão? {remaining_actor}\n\n")
+    # Remove explicitamente o ator da sessão para evitar erros ao acessá-lo
+    session.expunge(actor)
+    # Consulta segura, pois o objeto não está mais na sessão
+    remaining_actor = session.query(Actor).filter_by(id=actor.id).first()
 
     assert result["success"] is True
     assert session.query(MovieActor).filter_by(actor_id=actor.id).count() == 0
-    assert remaining_actor is None  # 🔹 Esse assert está falhando
-
-
-
+    assert remaining_actor is None
 
 
 def test_select_actor(session, actor_repo):

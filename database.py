@@ -39,10 +39,10 @@ else:
 if not DATABASE_URL:
     raise RuntimeError("DATABASE_URL não definida e não estamos rodando no Docker.")
 
-# # Forçar o uso do banco de testes ao rodar initialize_database()
-# if "PYTEST_RUNNING" not in os.environ:
-#     os.environ["PYTEST_RUNNING"] = "true"
-#     description = "Banco de testes"
+# Forçar o uso do banco de testes ao rodar initialize_database()
+if "PYTEST_RUNNING" not in os.environ:
+    os.environ["PYTEST_RUNNING"] = "true"
+    description = "Banco de testes"
 
 logging.info(f"Using database: {description.upper()} - URL: {DATABASE_URL}")
 

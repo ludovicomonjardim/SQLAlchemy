@@ -3,7 +3,7 @@ from colorlog import ColoredFormatter
 from logging.handlers import RotatingFileHandler
 import os
 
-def setup_logger(log_level="DEBUG", log_file=None):
+def setup_logger(log_level="DEBUG", log_file=None, complete=True):
     """
     Configura o logger com formatação colorida e opções adicionais.
     :param log_level: Nível de log (DEBUG, INFO, WARNING, ERROR, CRITICAL).
@@ -20,20 +20,36 @@ def setup_logger(log_level="DEBUG", log_file=None):
         logger.removeHandler(handler)
 
     # Formato com cores
-    formatter = ColoredFormatter(
-        "%(log_color)s%(levelname)-8s%(reset)s %(blue)s %(module)s:%(funcName)s %(lineno)d%(reset)s - %(white)s%(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-        reset=True,
-        log_colors={
-            'DEBUG': 'cyan',
-            'INFO': 'green',
-            'WARNING': 'yellow',
-            'ERROR': 'red',
-            'CRITICAL': 'red,bg_white',
-        },
-        secondary_log_colors={},
-        style='%'
-    )
+    if complete:
+        formatter = ColoredFormatter(
+            "%(log_color)s%(levelname)-8s%(reset)s %(blue)s %(module)s:%(funcName)s %(lineno)d%(reset)s - %(white)s%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+            reset=True,
+            log_colors={
+                'DEBUG': 'green',
+                'INFO': 'cyan',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red,bg_white',
+            },
+            secondary_log_colors={},
+            style='%'
+        )
+    else:
+        formatter = ColoredFormatter(
+            "\n%(log_color)s%(levelname)-8s%(reset)s \n> %(blue)s%(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S",
+            reset=True,
+            log_colors={
+                'DEBUG': 'cyan',
+                'INFO': 'green',
+                'WARNING': 'yellow',
+                'ERROR': 'red',
+                'CRITICAL': 'red,bg_white',
+            },
+            secondary_log_colors={},
+            style='%'
+        )
 
     # Handler para console
     console_handler = logging.StreamHandler()

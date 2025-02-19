@@ -32,8 +32,8 @@ def main():
 
         # Inicializa os CRUDs
         # logging.info("Inicializando CRUDs...")
-        # ActorCrud()
-        DirectorCrud()
+        ActorCrud()
+        # DirectorCrud()
         # GenreCrud()
         # ClassificationCrud()
         # CinemaSessionCrud()

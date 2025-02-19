@@ -5,8 +5,8 @@ from sqlalchemy.orm import validates, Session
 class MovieActor(Base):
     __tablename__ = "movie_actor"  # Nome padronizado no singular
 
-    movie_id = Column(Integer, ForeignKey("movies.id"), nullable=False)
-    actor_id = Column(Integer, ForeignKey("actors.id"), nullable=False)
+    movie_id = Column(Integer, ForeignKey("movies.id", ondelete="CASCADE"), nullable=False)
+    actor_id = Column(Integer, ForeignKey("actors.id", ondelete="CASCADE"), nullable=False)
     role = Column(String(100), nullable=True)
 
     __table_args__ = (

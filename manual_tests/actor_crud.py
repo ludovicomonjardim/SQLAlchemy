@@ -41,7 +41,9 @@ class ActorCrud:
 
     def insert(self):
         print(f"\nINSERT - {self.tabel_name.upper()}")
+
         result = self.table_repo.insert({"name": self.name_to_insert})
+
         if result["success"]:
             self.ids_inserted = result["data"]
             print(f"✅ O nome {self.name_to_insert}, ID '{self.ids_inserted}', foi inserido com sucesso")

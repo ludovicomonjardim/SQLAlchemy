@@ -18,7 +18,7 @@ class Actor(Base):
 
     @validates("name")
     def validate_name(self, key, value):
-        if not isinstance(value, str) or not value.strip() or len(value) > 100:
+        if not isinstance(value, str) or not value.strip() or len(value.strip()) > 100:
             raise ValueError("Actor name must be a non-empty string with a maximum of 100 characters.")
         return value.strip()
 
