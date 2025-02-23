@@ -44,7 +44,6 @@ def test_tables_creation():
 
     assert expected_tables.issubset(tables), f"Faltam tabelas: {expected_tables - tables}"
 
-
 def test_session_rollback(session):
     """Verifica se o rollback está funcionando corretamente."""
     from models.actor import Actor

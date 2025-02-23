@@ -1,5 +1,6 @@
 import pytest
 import logging
+import time
 from models.actor import Actor
 from repositories.actor_repository import ActorRepository
 from utils.logging_config import setup_logger
@@ -162,3 +163,12 @@ def test_bulk_insert_and_delete(session, actor_repo):
 
     delete_result = actor_repo.delete({})
     assert delete_result["success"] is True
+
+def test_bulk_insert_performance(session, actor_repo):
+    start = time.time()
+    actors = [{"name": f"Ator {i}"} for i in range(1000)]
+    result = actor_repo.insert(actors)
+    duration = time.time() - start
+
+    assert result["success"]
+    assert duration < 2  # Exemplo: garantir que 1000 inserções ocorram em menos de 2s.

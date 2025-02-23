@@ -29,7 +29,7 @@ description = ""
 # Verifica se está rodando testes e escolhe o banco adequado
 if os.getenv("PYTEST_RUNNING", "false").lower() == "true":
     DATABASE_URL = "postgresql+psycopg2://postgres:admin@localhost:5432/test_cinema"
-    decription = "Banco de testes"
+    description = "Banco de testes"
 elif DOCKER_ENV:
     DATABASE_URL = "postgresql+psycopg2://postgres:admin@db:5432/cinema"
     description = "Banco do Docker"
@@ -82,8 +82,8 @@ def initialize_database():
     #
     # CinemaSession.__table__.create(engine, checkfirst=True)
     # Ticket.__table__.create(engine, checkfirst=True)
-
-    logging.info("🔹 Criando todas as tabelas...")
+    #
+    # logging.info("🔹 Criando todas as tabelas...")
 
     # 🔹 Criar todas as tabelas corretamente
     Base.metadata.create_all(engine)

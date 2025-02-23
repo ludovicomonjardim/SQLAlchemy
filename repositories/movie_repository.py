@@ -99,14 +99,19 @@ class MovieRepository(CrudBaseRepository):
                 if not movies_to_delete:
                     return {"success": False, "error": "Erro: Nenhum filme encontrado para exclusão."}
 
-                for movie in movies_to_delete:
-                    associated_sessions = session.query(CinemaSession).filter(
-                        CinemaSession.movie_id == movie.id).count()
-                    if associated_sessions > 0:
-                        return {
-                            "success": False,
-                            "error": f"Erro: Não é possível excluir '{movie.title}', pois está associado a {associated_sessions} sessão(ões) de cinema."
-                        }
+                # for movie in movies_to_delete:
+                #     associated_sessions = session.query(CinemaSession).filter(
+                #         CinemaSession.movie_id == movie.id).count()
+                #     if associated_sessions > 0:
+                #         return {
+                #             "success": False,
+                #             "error": f"Erro: Não é possível excluir '{movie.title}', pois está associado a {associated_sessions} sessão(ões) de cinema."
+                #         }
+
+                movies_allowed = [movie for movie in movies_to_delete if
+                                  session.query(CinemaSession).filter(CinemaSession.movie_id == movie.id).count() == 0]
+                if not movies_allowed:
+                    return {"success": False, "error": "Nenhum filme pode ser excluído."}
 
                 deleted_count = session.query(Movie).filter(*where).delete(synchronize_session=False)
 
